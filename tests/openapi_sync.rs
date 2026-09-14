@@ -55,7 +55,10 @@ async fn create_api_key_rejects_the_machine_only_connections_scope() {
         .create(&request)
         .await
         .unwrap_err();
-    assert!(matches!(err, Error::ScopeNotCreatable(ApiKeyScope::Connections)));
+    assert!(matches!(
+        err,
+        Error::ScopeNotCreatable(ApiKeyScope::Connections)
+    ));
 }
 
 #[tokio::test]
