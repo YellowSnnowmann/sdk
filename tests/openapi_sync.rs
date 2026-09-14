@@ -136,7 +136,9 @@ fn generated_rust_routes_match_the_public_manifest() {
 
     // 227 -> 229: the two public blog reads, `GET /blog/posts` and
     // `GET /blog/posts/{slug}`.
-    assert_eq!(manifest["source"]["operationCount"], 229);
+    // 229 -> 234: the five new API-key feature-scope routes replacing the
+    // read/write/inference scope surface.
+    assert_eq!(manifest["source"]["operationCount"], 234);
     assert_eq!(manifest["source"]["supplementalOperationCount"], 14);
     // 37 -> 39: the two service-token operations on
     // `/opencompany/instances/{slug}/inference-key`. They are counted with the
