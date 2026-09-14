@@ -6,10 +6,18 @@ use crate::{enc, Error, HttpClient};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
+/// What a key may reach, named by feature. `Connections` is machine-only and
+/// cannot be minted through `POST /api-keys`.
 pub enum ApiKeyScope {
-    Read,
-    Write,
     Inference,
+    Voice,
+    Search,
+    Media,
+    Storage,
+    Meetings,
+    Account,
+    Companies,
+    Connections,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
