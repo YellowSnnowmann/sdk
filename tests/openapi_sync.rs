@@ -160,9 +160,11 @@ fn generated_rust_routes_match_the_public_manifest() {
     let rust_routes = PUBLIC_ROUTES.iter().copied().collect::<BTreeSet<_>>();
 
     // 227 -> 229: the two public blog reads, `GET /blog/posts` and
-    // `GET /blog/posts/{slug}`.
-    // 229 -> 234: the four `/auth/key*` grant routes (key issuance for
-    // scoped API keys) and `GET /payments/summary`.
+    // `GET /blog/posts/{slug}`. 229 -> 230: `GET /payments/summary`, the
+    // authenticated billing summary used by clients to render account
+    // credit state. 230 -> 234: the four `/auth/key*` grant routes (key
+    // issuance for scoped API keys), picked up when resyncing against the
+    // backend's teams-removal spec.
     assert_eq!(manifest["source"]["operationCount"], 234);
     assert_eq!(manifest["source"]["supplementalOperationCount"], 14);
     // 37 -> 39: the two service-token operations on
