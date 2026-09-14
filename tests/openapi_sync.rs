@@ -37,6 +37,28 @@ async fn typed_api_key_request_uses_openapi_field_names() {
 }
 
 #[tokio::test]
+async fn create_api_key_rejects_the_machine_only_connections_scope() {
+    // `POST /api-keys` rejects a `connections` mint outright (see
+    // `HUMAN_MINTABLE_SCOPES` in the backend's `apiKey.ts`), so the SDK must
+    // catch this client-side rather than let the request go out and fail.
+    let server = MockServer::start().await;
+    // No mock mounted: if the SDK sent the request, this would panic with
+    // "no matching mock" instead of the expected client-side error.
+    let request = CreateApiKeyRequest {
+        name: "CI".into(),
+        scopes: vec![ApiKeyScope::Inference, ApiKeyScope::Connections],
+        allowed_ips: vec![],
+        expires_at: None,
+    };
+    let err = TinyHumansClient::new(server.uri())
+        .api_keys()
+        .create(&request)
+        .await
+        .unwrap_err();
+    assert!(matches!(err, Error::ScopeNotCreatable(ApiKeyScope::Connections)));
+}
+
+#[tokio::test]
 async fn medulla_task_status_serializes_in_camel_case() {
     let server = MockServer::start().await;
     Mock::given(method("POST"))
