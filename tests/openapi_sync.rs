@@ -150,7 +150,7 @@ fn generated_rust_routes_match_the_public_manifest() {
     // user-facing API, the writes take the admin service token.
     assert_eq!(manifest["source"]["excludedAdminOperationCount"], 42);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
-    assert_eq!(rust_routes.len(), 229);
+    assert_eq!(rust_routes.len(), 234);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
