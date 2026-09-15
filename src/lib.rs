@@ -537,7 +537,11 @@ mod exclusion_tests {
         // the admin dashboard drives with the admin service token. The two
         // public `/blog/posts` reads that arrived with them are ordinary
         // user-facing API and are exposed; only the authoring side is blocked.
-        assert_eq!(UNEXPOSED_ROUTES.len(), 54);
+        //
+        // 54 -> 55: `POST /admin/blog-images`, the multipart upload the
+        // dashboard uses for a post's cover and body figures. Same service
+        // token as the other blog writes, so it is blocked alongside them.
+        assert_eq!(UNEXPOSED_ROUTES.len(), 55);
         for (method, template) in UNEXPOSED_ROUTES {
             let concrete_path = template
                 .split('/')
