@@ -4,7 +4,7 @@ use serde_json::json;
 use tinyhumans_sdk::api::api_keys::{ApiKeyScope, CreateApiKeyRequest};
 use tinyhumans_sdk::api::medulla::{CreateTaskRequest, TaskStatus};
 use tinyhumans_sdk::generated_public_routes::PUBLIC_ROUTES;
-use tinyhumans_sdk::TinyHumansClient;
+use tinyhumans_sdk::{Error, TinyHumansClient};
 use wiremock::matchers::{body_json, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
@@ -34,6 +34,31 @@ async fn typed_api_key_request_uses_openapi_field_names() {
         .create(&request)
         .await
         .unwrap();
+}
+
+#[tokio::test]
+async fn create_api_key_rejects_the_machine_only_connections_scope() {
+    // `POST /api-keys` rejects a `connections` mint outright (see
+    // `HUMAN_MINTABLE_SCOPES` in the backend's `apiKey.ts`), so the SDK must
+    // catch this client-side rather than let the request go out and fail.
+    let server = MockServer::start().await;
+    // No mock mounted: if the SDK sent the request, this would panic with
+    // "no matching mock" instead of the expected client-side error.
+    let request = CreateApiKeyRequest {
+        name: "CI".into(),
+        scopes: vec![ApiKeyScope::Inference, ApiKeyScope::Connections],
+        allowed_ips: vec![],
+        expires_at: None,
+    };
+    let err = TinyHumansClient::new(server.uri())
+        .api_keys()
+        .create(&request)
+        .await
+        .unwrap_err();
+    assert!(matches!(
+        err,
+        Error::ScopeNotCreatable(ApiKeyScope::Connections)
+    ));
 }
 
 #[tokio::test]
@@ -135,11 +160,11 @@ fn generated_rust_routes_match_the_public_manifest() {
     let rust_routes = PUBLIC_ROUTES.iter().copied().collect::<BTreeSet<_>>();
 
     // 227 -> 229: the two public blog reads, `GET /blog/posts` and
-    // `GET /blog/posts/{slug}`.
-    //
-    // 229 -> 234: the four `/auth/key*` operations (key management and the
-    // one-click grant flow) and `GET /payments/summary`, synced in 0aa350a
-    // without this pin moving with them.
+    // `GET /blog/posts/{slug}`. 229 -> 230: `GET /payments/summary`, the
+    // authenticated billing summary used by clients to render account
+    // credit state. 230 -> 234: the four `/auth/key*` grant routes (key
+    // issuance for scoped API keys), picked up when resyncing against the
+    // backend's teams-removal spec.
     assert_eq!(manifest["source"]["operationCount"], 234);
     assert_eq!(manifest["source"]["supplementalOperationCount"], 14);
     // 37 -> 39: the two service-token operations on
@@ -151,9 +176,15 @@ fn generated_rust_routes_match_the_public_manifest() {
     // reads. Same change, opposite side of the line: the reads are ordinary
     // user-facing API, the writes take the admin service token.
     //
-    // 42 -> 43: `POST /admin/blog-images`, the multipart upload behind a
+    // 42 -> 43: `POST /opencompany/instances/{slug}/usage`, the orchestrator's
+    // runtime-billing report. `operationCount` is unchanged at 234 because a
+    // service-token route never enters the public surface — it is excluded by
+    // its security requirement rather than by name, so it lands here and
+    // nowhere else.
+    //
+    // 43 -> 44: `POST /admin/blog-images`, the multipart upload behind a
     // post's cover and body figures. Same token as the other blog writes.
-    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 43);
+    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 44);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
     assert_eq!(rust_routes.len(), 234);
     assert_eq!(rust_routes, manifest_routes);

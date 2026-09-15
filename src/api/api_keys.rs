@@ -48,6 +48,9 @@ impl<'a> ApiKeysApi<'a> {
     }
 
     pub async fn create(&self, request: &CreateApiKeyRequest) -> Result<DynamicResponse, Error> {
+        if request.scopes.contains(&ApiKeyScope::Connections) {
+            return Err(Error::ScopeNotCreatable(ApiKeyScope::Connections));
+        }
         let body = serde_json::to_value(request).expect("API key request is serializable");
         self.http
             .send_typed(Method::POST, "/api-keys", &[], Some(&body), true)

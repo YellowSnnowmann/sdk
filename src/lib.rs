@@ -68,6 +68,12 @@ pub enum Error {
     SocketAckClosed,
     #[error("route is intentionally not exposed by the SDK: {0} {1}")]
     RouteNotExposed(String, String),
+    /// A caller passed a scope to [`crate::api::api_keys::ApiKeysApi::create`]
+    /// that `POST /api-keys` does not accept from a human-minted key. Caught
+    /// client-side so the caller learns why instead of getting a 400 from the
+    /// backend after the request already went out.
+    #[error("scope {0:?} cannot be minted through POST /api-keys")]
+    ScopeNotCreatable(crate::api::api_keys::ApiKeyScope),
     /// A caller set `stream: true` on a route whose transport buffers the
     /// whole response body (see [`HttpClient::send`]) rather than yielding
     /// incremental events, so streaming it would silently hand back one
@@ -538,10 +544,17 @@ mod exclusion_tests {
         // public `/blog/posts` reads that arrived with them are ordinary
         // user-facing API and are exposed; only the authoring side is blocked.
         //
-        // 54 -> 55: `POST /admin/blog-images`, the multipart upload the
+        // 54 -> 55: `POST /opencompany/instances/{slug}/usage`, which the
+        // orchestrator calls to report how long each hosted company held its
+        // memory so the platform can bill it. Service-token authenticated like
+        // the two `inference-key` operations above, and excluded for the same
+        // reason: no SDK consumer holds the shared secret, and a client method
+        // for it would only ever produce a 401.
+        //
+        // 55 -> 56: `POST /admin/blog-images`, the multipart upload the
         // dashboard uses for a post's cover and body figures. Same service
         // token as the other blog writes, so it is blocked alongside them.
-        assert_eq!(UNEXPOSED_ROUTES.len(), 55);
+        assert_eq!(UNEXPOSED_ROUTES.len(), 56);
         for (method, template) in UNEXPOSED_ROUTES {
             let concrete_path = template
                 .split('/')
