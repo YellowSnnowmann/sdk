@@ -60,6 +60,7 @@ const RETAINED_UNEXPOSED_ROUTES = [
   // list exists to prevent. Declared here so both paths agree.
   ["POST", "/opencompany/instances/{slug}/inference-key"],
   ["DELETE", "/opencompany/instances/{slug}/inference-key"],
+  ["POST", "/opencompany/instances/{slug}/usage"],
   ["POST", "/admin/announcements"],
   ["DELETE", "/admin/announcements/{announcementId}"],
   ["PATCH", "/admin/announcements/{announcementId}"],

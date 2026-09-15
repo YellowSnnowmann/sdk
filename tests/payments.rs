@@ -333,6 +333,53 @@ async fn list_credit_transactions_sends_query() {
 }
 
 #[tokio::test]
+async fn get_credit_ledger_sends_query() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/payments/credits/ledger"))
+        .and(query_param("range", "30d"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": true,
+            "data": {"entries": [], "cursor": null}
+        })))
+        .mount(&server)
+        .await;
+
+    let client = TinyHumansClient::new(server.uri());
+    let result = client
+        .payments()
+        .get_credit_ledger(&[("range", Some("30d".to_string()))])
+        .await
+        .unwrap();
+
+    assert_eq!(result, json!({"entries": [], "cursor": null}));
+}
+
+#[tokio::test]
+async fn export_credit_ledger_returns_csv_bytes() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/payments/credits/ledger/export"))
+        .and(query_param("range", "90d"))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .set_body_string("date,amount\n2026-01-01,10.00\n")
+                .insert_header("content-type", "text/csv"),
+        )
+        .mount(&server)
+        .await;
+
+    let client = TinyHumansClient::new(server.uri());
+    let result = client
+        .payments()
+        .export_credit_ledger(&[("range", Some("90d".to_string()))])
+        .await
+        .unwrap();
+
+    assert_eq!(result, b"date,amount\n2026-01-01,10.00\n".to_vec());
+}
+
+#[tokio::test]
 async fn get_stripe_checkout_return_sends_query() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))

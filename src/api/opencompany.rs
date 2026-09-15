@@ -35,6 +35,13 @@ impl<'a> OpenCompanyApi<'a> {
             .await
             .map(Into::into)
     }
+    /// Usage summary across the caller's OpenCompany instances.
+    pub async fn usage(&self) -> Result<DynamicResponse, Error> {
+        self.http
+            .send(Method::GET, "/opencompany/instances/usage", &[], None, true)
+            .await
+            .map(Into::into)
+    }
     pub async fn create_instance(
         &self,
         request: &CreateInstanceRequest,

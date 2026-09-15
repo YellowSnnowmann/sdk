@@ -219,6 +219,27 @@ impl<'a> PaymentsApi<'a> {
             .map(Into::into)
     }
 
+    /// One page of the caller's credit ledger, newest first. Accepts
+    /// `range`, `accountType`, `eventType`, `cursor`, and `limit` query
+    /// params.
+    pub async fn get_credit_ledger(&self, query: &[QueryParam]) -> Result<DynamicResponse, Error> {
+        self.http
+            .send(Method::GET, "/payments/credits/ledger", query, None, true)
+            .await
+            .map(Into::into)
+    }
+
+    /// Download the caller's credit ledger as CSV (the same entries
+    /// [`Self::get_credit_ledger`] pages through, as one file). Accepts
+    /// `range`, `accountType`, and `eventType` query params. The response is
+    /// a `text/csv` attachment, not the usual `{success, data}` envelope, so
+    /// this returns raw bytes rather than going through [`DynamicResponse`].
+    pub async fn export_credit_ledger(&self, query: &[QueryParam]) -> Result<Vec<u8>, Error> {
+        self.http
+            .send_bytes_query(Method::GET, "/payments/credits/ledger/export", query)
+            .await
+    }
+
     /// Create a credit top-up payment.
     pub async fn create_credit_top_up(
         &self,
