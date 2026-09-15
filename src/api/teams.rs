@@ -37,7 +37,7 @@ impl<'a> TeamsApi<'a> {
             .await
     }
 
-    /// Get usage and spend insights plus remaining budget for the current cycle.
+    /// Get usage and spend insights plus remaining credit for the current subscription period.
     pub async fn get_my_usage(&self) -> Result<DynamicResponse, Error> {
         self.http
             .send_typed(Method::GET, "/teams/me/usage", &[], None, true)

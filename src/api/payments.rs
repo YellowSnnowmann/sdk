@@ -211,10 +211,21 @@ impl<'a> PaymentsApi<'a> {
             .map(Into::into)
     }
 
-    /// Get the current user's credit balance.
+    /// Get the current user's credit balance by source (promotional,
+    /// subscription, top-up) with the soonest expiry of each lot kind.
     pub async fn get_credit_balance(&self) -> Result<DynamicResponse, Error> {
         self.http
             .send(Method::GET, "/payments/credits/balance", &[], None, true)
+            .await
+            .map(Into::into)
+    }
+
+    /// The current user's live credit lots and when each one expires.
+    /// Subscription credit lapses at the end of the paid period (no rollover);
+    /// top-up credit a year after purchase.
+    pub async fn get_credit_lots(&self) -> Result<DynamicResponse, Error> {
+        self.http
+            .send(Method::GET, "/payments/credits/lots", &[], None, true)
             .await
             .map(Into::into)
     }

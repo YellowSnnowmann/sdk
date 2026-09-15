@@ -333,6 +333,27 @@ async fn list_credit_transactions_sends_query() {
 }
 
 #[tokio::test]
+async fn get_credit_lots_unwraps() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/payments/credits/lots"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": true,
+            "data": {"lots": [{"kind": "SUBSCRIPTION", "remainingUsd": 22}]}
+        })))
+        .mount(&server)
+        .await;
+
+    let client = TinyHumansClient::new(server.uri());
+    let result = client.payments().get_credit_lots().await.unwrap();
+
+    assert_eq!(
+        result,
+        json!({"lots": [{"kind": "SUBSCRIPTION", "remainingUsd": 22}]})
+    );
+}
+
+#[tokio::test]
 async fn get_credit_ledger_sends_query() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
