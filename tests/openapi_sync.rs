@@ -134,11 +134,11 @@ fn generated_rust_routes_match_the_public_manifest() {
         .collect::<BTreeSet<_>>();
     let rust_routes = PUBLIC_ROUTES.iter().copied().collect::<BTreeSet<_>>();
 
-    // 227 -> 229: the two public blog reads, `GET /blog/posts` and
-    // `GET /blog/posts/{slug}`.
-    //
-    // 229 -> 234: the API-key management and payments-summary routes that
-    // landed in the manifest without this count moving with them.
+    // 227 -> 229: the two public blog reads. 229 -> 230: the authenticated
+    // billing summary used by clients to render account credit state.
+    // 230 -> 234: the four `/auth/key*` grant routes (key issuance for
+    // desktop/harness clients), picked up when resyncing against the
+    // backend's teams-removal spec.
     //
     // 234 -> 237: the dashboard's usage reads —
     // `GET /opencompany/instances/usage`, `GET /payments/credits/ledger` and
@@ -155,7 +155,10 @@ fn generated_rust_routes_match_the_public_manifest() {
     // user-facing API, the writes take the admin service token.
     //
     // 42 -> 43: `POST /opencompany/instances/{slug}/usage`, the orchestrator's
-    // service-token runtime report. The user-facing read of the same data is
+    // runtime-billing report. It leaves `operationCount` untouched because a
+    // service-token route never enters the public surface — it is excluded by
+    // its security requirement rather than by name, so it lands here and
+    // nowhere else. The user-facing read of the same data is
     // `GET /opencompany/instances/usage`, which is public.
     assert_eq!(manifest["source"]["excludedAdminOperationCount"], 43);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
