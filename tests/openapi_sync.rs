@@ -44,7 +44,7 @@ fn creatable_api_key_scope_excludes_the_machine_only_connections_scope() {
     // `Connections` variant at all, so this can't compile back in by
     // accident; this asserts the wire values that *are* reachable stay in
     // sync with `ApiKeyScope` minus `connections`.
-    let creatable_wire_values: BTreeSet<&str> = [
+    let creatable_wire_values: BTreeSet<String> = [
         CreatableApiKeyScope::Inference,
         CreatableApiKeyScope::Voice,
         CreatableApiKeyScope::Search,
@@ -56,15 +56,16 @@ fn creatable_api_key_scope_excludes_the_machine_only_connections_scope() {
     ]
     .iter()
     .map(|scope| match serde_json::to_value(scope).unwrap() {
-        serde_json::Value::String(s) => Box::leak(s.into_boxed_str()) as &str,
+        serde_json::Value::String(s) => s,
         other => panic!("expected a string, got {other:?}"),
     })
     .collect();
     assert_eq!(
         creatable_wire_values,
-        BTreeSet::from([
-            "inference", "voice", "search", "media", "storage", "meetings", "account", "companies"
-        ])
+        BTreeSet::from(
+            ["inference", "voice", "search", "media", "storage", "meetings", "account", "companies"]
+                .map(String::from)
+        )
     );
     assert!(!creatable_wire_values.contains("connections"));
 }
