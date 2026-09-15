@@ -132,7 +132,6 @@ pub const PUBLIC_ROUTES: &[(&str, &str)] = &[
     ("POST", "/medulla/v1/hosts/enroll"),
     ("GET", "/medulla/v1/hosts/entitlements"),
     ("POST", "/medulla/v1/hosts/invite"),
-    ("GET", "/medulla/v1/insights"),
     ("GET", "/medulla/v1/roster"),
     ("GET", "/medulla/v1/routing/strategy"),
     ("PUT", "/medulla/v1/routing/strategy"),

@@ -140,10 +140,10 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 229 -> 234: the API-key management and payments-summary routes that
     // landed in the manifest without this count moving with them.
     //
-    // 234 -> 238: the dashboard's usage reads — `GET /medulla/v1/insights`,
+    // 234 -> 237: the dashboard's usage reads —
     // `GET /opencompany/instances/usage`, `GET /payments/credits/ledger` and
     // `GET /payments/credits/ledger/export`.
-    assert_eq!(manifest["source"]["operationCount"], 238);
+    assert_eq!(manifest["source"]["operationCount"], 237);
     assert_eq!(manifest["source"]["supplementalOperationCount"], 14);
     // 37 -> 39: the two service-token operations on
     // `/opencompany/instances/{slug}/inference-key`. They are counted with the
@@ -159,7 +159,7 @@ fn generated_rust_routes_match_the_public_manifest() {
     // `GET /opencompany/instances/usage`, which is public.
     assert_eq!(manifest["source"]["excludedAdminOperationCount"], 43);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
-    assert_eq!(rust_routes.len(), 238);
+    assert_eq!(rust_routes.len(), 237);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
