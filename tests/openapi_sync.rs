@@ -136,7 +136,11 @@ fn generated_rust_routes_match_the_public_manifest() {
 
     // 227 -> 229: the two public blog reads, `GET /blog/posts` and
     // `GET /blog/posts/{slug}`.
-    assert_eq!(manifest["source"]["operationCount"], 229);
+    //
+    // 229 -> 234: the four `/auth/key*` operations (key management and the
+    // one-click grant flow) and `GET /payments/summary`, synced in 0aa350a
+    // without this pin moving with them.
+    assert_eq!(manifest["source"]["operationCount"], 234);
     assert_eq!(manifest["source"]["supplementalOperationCount"], 14);
     // 37 -> 39: the two service-token operations on
     // `/opencompany/instances/{slug}/inference-key`. They are counted with the
@@ -146,9 +150,12 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 39 -> 42: the three `/admin/blog-posts` writes that arrived with those
     // reads. Same change, opposite side of the line: the reads are ordinary
     // user-facing API, the writes take the admin service token.
-    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 42);
+    //
+    // 42 -> 43: `POST /admin/blog-images`, the multipart upload behind a
+    // post's cover and body figures. Same token as the other blog writes.
+    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 43);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
-    assert_eq!(rust_routes.len(), 229);
+    assert_eq!(rust_routes.len(), 234);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
