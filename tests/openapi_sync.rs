@@ -36,6 +36,39 @@ async fn typed_api_key_request_uses_openapi_field_names() {
         .unwrap();
 }
 
+#[test]
+fn creatable_api_key_scope_excludes_the_machine_only_connections_scope() {
+    // `POST /api-keys` rejects `connections` (it is granted automatically to
+    // provisioned tenant origins by the `GET /auth/key` PKCE flow instead).
+    // `CreateApiKeyRequest.scopes` uses `CreatableApiKeyScope`, which has no
+    // `Connections` variant at all, so this can't compile back in by
+    // accident; this asserts the wire values that *are* reachable stay in
+    // sync with `ApiKeyScope` minus `connections`.
+    let creatable_wire_values: BTreeSet<&str> = [
+        CreatableApiKeyScope::Inference,
+        CreatableApiKeyScope::Voice,
+        CreatableApiKeyScope::Search,
+        CreatableApiKeyScope::Media,
+        CreatableApiKeyScope::Storage,
+        CreatableApiKeyScope::Meetings,
+        CreatableApiKeyScope::Account,
+        CreatableApiKeyScope::Companies,
+    ]
+    .iter()
+    .map(|scope| match serde_json::to_value(scope).unwrap() {
+        serde_json::Value::String(s) => Box::leak(s.into_boxed_str()) as &str,
+        other => panic!("expected a string, got {other:?}"),
+    })
+    .collect();
+    assert_eq!(
+        creatable_wire_values,
+        BTreeSet::from([
+            "inference", "voice", "search", "media", "storage", "meetings", "account", "companies"
+        ])
+    );
+    assert!(!creatable_wire_values.contains("connections"));
+}
+
 #[tokio::test]
 async fn medulla_task_status_serializes_in_camel_case() {
     let server = MockServer::start().await;
