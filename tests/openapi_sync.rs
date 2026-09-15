@@ -63,8 +63,17 @@ fn creatable_api_key_scope_excludes_the_machine_only_connections_scope() {
     assert_eq!(
         creatable_wire_values,
         BTreeSet::from(
-            ["inference", "voice", "search", "media", "storage", "meetings", "account", "companies"]
-                .map(String::from)
+            [
+                "inference",
+                "voice",
+                "search",
+                "media",
+                "storage",
+                "meetings",
+                "account",
+                "companies"
+            ]
+            .map(String::from)
         )
     );
     assert!(!creatable_wire_values.contains("connections"));
