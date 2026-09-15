@@ -68,8 +68,9 @@ pub enum Error {
     SocketAckClosed,
     #[error("route is intentionally not exposed by the SDK: {0} {1}")]
     RouteNotExposed(String, String),
-    /// A caller passed a scope to [`crate::api::api_keys::ApiKeysApi::create`]
-    /// that `POST /api-keys` does not accept from a human-minted key. Caught
+    /// A caller tried to narrow a scope that `POST /api-keys` does not accept
+    /// from a human-minted key into [`crate::api::api_keys::CreatableApiKeyScope`]
+    /// (the type [`crate::api::api_keys::CreateApiKeyRequest`] takes). Caught
     /// client-side so the caller learns why instead of getting a 400 from the
     /// backend after the request already went out.
     #[error("scope {0:?} cannot be minted through POST /api-keys")]
@@ -549,7 +550,8 @@ mod exclusion_tests {
         // memory so the platform can bill it. Service-token authenticated like
         // the two `inference-key` operations above, and excluded for the same
         // reason: no SDK consumer holds the shared secret, and a client method
-        // for it would only ever produce a 401.
+        // for it would only ever produce a 401. The user-facing read of the
+        // same data is `GET /opencompany/instances/usage`, which is exposed.
         assert_eq!(UNEXPOSED_ROUTES.len(), 55);
         for (method, template) in UNEXPOSED_ROUTES {
             let concrete_path = template

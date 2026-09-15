@@ -2,7 +2,10 @@
 
 use reqwest::Method;
 
-use super::types::{DynamicResponse, EmailLinkRequest, IntegrationTokenRequest, LoginTokenRequest};
+use super::types::{
+    DynamicResponse, EmailLinkRequest, IntegrationTokenRequest, LoginTokenRequest,
+    RedeemKeyGrantRequest,
+};
 use crate::{enc, Error, HttpClient, QueryParam};
 
 /// Typed client for the `/auth/*` routes.
@@ -62,6 +65,56 @@ impl<'a> AuthApi<'a> {
                 Some(&body),
                 true,
             )
+            .await
+    }
+
+    /// Start a PKCE key grant (browser flow). Redirects to provider sign-in;
+    /// on approval, posts a one-time `code` to `callback_url` (`mode=code`,
+    /// the default) or ends on this backend's own dashboard (`mode=manual`).
+    /// Redeem the resulting code with [`Self::redeem_key_grant`] (`mode=code`)
+    /// or [`Self::describe_key_grant`]/[`Self::issue_key_grant`]
+    /// (`mode=manual`).
+    pub async fn start_key_grant(
+        &self,
+        callback_url: &str,
+        query: &[QueryParam],
+    ) -> Result<DynamicResponse, Error> {
+        let mut full_query = vec![("callback_url", Some(callback_url.to_string()))];
+        full_query.extend_from_slice(query);
+        self.http
+            .send_typed(Method::GET, "/auth/key", &full_query, None, true)
+            .await
+    }
+
+    /// Redeem a PKCE key grant for an API key (`mode=code` flow).
+    /// Unauthenticated: possession of the `code_verifier` is the proof.
+    /// Returns the plaintext key exactly once, in `data.key`.
+    pub async fn redeem_key_grant(
+        &self,
+        request: &RedeemKeyGrantRequest,
+    ) -> Result<DynamicResponse, Error> {
+        let body = serde_json::to_value(request).expect("key grant request is serializable");
+        self.http
+            .send_typed(Method::POST, "/auth/keys", &[], Some(&body), true)
+            .await
+    }
+
+    /// Describe a pending manual key grant (`mode=manual` flow): the origin
+    /// that asked, the label the key will carry, and its scopes. Does not
+    /// spend the grant.
+    pub async fn describe_key_grant(&self, code: &str) -> Result<DynamicResponse, Error> {
+        let path = format!("/auth/key/grant/{}", enc(code));
+        self.http
+            .send_typed(Method::GET, &path, &[], None, true)
+            .await
+    }
+
+    /// Spend a pending manual key grant and mint its key, returning the
+    /// plaintext once in `data.key`.
+    pub async fn issue_key_grant(&self, code: &str) -> Result<DynamicResponse, Error> {
+        let path = format!("/auth/key/grant/{}/issue", enc(code));
+        self.http
+            .send_typed(Method::POST, &path, &[], None, true)
             .await
     }
 

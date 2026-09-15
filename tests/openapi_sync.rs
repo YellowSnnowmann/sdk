@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use serde_json::json;
-use tinyhumans_sdk::api::api_keys::{ApiKeyScope, CreateApiKeyRequest};
+use tinyhumans_sdk::api::api_keys::{ApiKeyScope, CreatableApiKeyScope, CreateApiKeyRequest};
 use tinyhumans_sdk::api::medulla::{CreateTaskRequest, TaskStatus};
 use tinyhumans_sdk::generated_public_routes::PUBLIC_ROUTES;
 use tinyhumans_sdk::{Error, TinyHumansClient};
@@ -25,7 +25,7 @@ async fn typed_api_key_request_uses_openapi_field_names() {
         .await;
     let request = CreateApiKeyRequest {
         name: "CI".into(),
-        scopes: vec![ApiKeyScope::Inference],
+        scopes: vec![CreatableApiKeyScope::Inference],
         allowed_ips: vec!["10.0.0.0/8".into()],
         expires_at: None,
     };
@@ -36,29 +36,76 @@ async fn typed_api_key_request_uses_openapi_field_names() {
         .unwrap();
 }
 
-#[tokio::test]
-async fn create_api_key_rejects_the_machine_only_connections_scope() {
+#[test]
+fn creatable_api_key_scope_excludes_the_machine_only_connections_scope() {
+    // `POST /api-keys` rejects `connections` (it is granted automatically to
+    // provisioned tenant origins by the `GET /auth/key` PKCE flow instead).
+    // `CreateApiKeyRequest.scopes` uses `CreatableApiKeyScope`, which has no
+    // `Connections` variant at all, so this can't compile back in by
+    // accident; this asserts the wire values that *are* reachable stay in
+    // sync with `ApiKeyScope` minus `connections`.
+    let creatable_wire_values: BTreeSet<String> = [
+        CreatableApiKeyScope::Inference,
+        CreatableApiKeyScope::Voice,
+        CreatableApiKeyScope::Search,
+        CreatableApiKeyScope::Media,
+        CreatableApiKeyScope::Storage,
+        CreatableApiKeyScope::Meetings,
+        CreatableApiKeyScope::Account,
+        CreatableApiKeyScope::Companies,
+    ]
+    .iter()
+    .map(|scope| match serde_json::to_value(scope).unwrap() {
+        serde_json::Value::String(s) => s,
+        other => panic!("expected a string, got {other:?}"),
+    })
+    .collect();
+    assert_eq!(
+        creatable_wire_values,
+        BTreeSet::from(
+            [
+                "inference",
+                "voice",
+                "search",
+                "media",
+                "storage",
+                "meetings",
+                "account",
+                "companies"
+            ]
+            .map(String::from)
+        )
+    );
+    assert!(!creatable_wire_values.contains("connections"));
+}
+
+#[test]
+fn create_api_key_rejects_the_machine_only_connections_scope() {
     // `POST /api-keys` rejects a `connections` mint outright (see
     // `HUMAN_MINTABLE_SCOPES` in the backend's `apiKey.ts`), so the SDK must
     // catch this client-side rather than let the request go out and fail.
-    let server = MockServer::start().await;
-    // No mock mounted: if the SDK sent the request, this would panic with
-    // "no matching mock" instead of the expected client-side error.
-    let request = CreateApiKeyRequest {
-        name: "CI".into(),
-        scopes: vec![ApiKeyScope::Inference, ApiKeyScope::Connections],
-        allowed_ips: vec![],
-        expires_at: None,
-    };
-    let err = TinyHumansClient::new(server.uri())
-        .api_keys()
-        .create(&request)
-        .await
-        .unwrap_err();
+    // `CreateApiKeyRequest.scopes` can't even hold `Connections`; the one
+    // way to get there from a full `ApiKeyScope` (say, copied off a listed
+    // key) is the fallible narrowing, which is where the error surfaces.
+    let err = CreatableApiKeyScope::try_from(ApiKeyScope::Connections).unwrap_err();
     assert!(matches!(
         err,
         Error::ScopeNotCreatable(ApiKeyScope::Connections)
     ));
+    // Every other scope narrows and widens back to itself.
+    for scope in [
+        ApiKeyScope::Inference,
+        ApiKeyScope::Voice,
+        ApiKeyScope::Search,
+        ApiKeyScope::Media,
+        ApiKeyScope::Storage,
+        ApiKeyScope::Meetings,
+        ApiKeyScope::Account,
+        ApiKeyScope::Companies,
+    ] {
+        let creatable = CreatableApiKeyScope::try_from(scope.clone()).unwrap();
+        assert_eq!(ApiKeyScope::from(creatable), scope);
+    }
 }
 
 #[tokio::test]
@@ -165,7 +212,11 @@ fn generated_rust_routes_match_the_public_manifest() {
     // credit state. 230 -> 234: the four `/auth/key*` grant routes (key
     // issuance for scoped API keys), picked up when resyncing against the
     // backend's teams-removal spec.
-    assert_eq!(manifest["source"]["operationCount"], 234);
+    //
+    // 234 -> 237: the dashboard's usage reads —
+    // `GET /opencompany/instances/usage`, `GET /payments/credits/ledger` and
+    // `GET /payments/credits/ledger/export`.
+    assert_eq!(manifest["source"]["operationCount"], 237);
     assert_eq!(manifest["source"]["supplementalOperationCount"], 14);
     // 37 -> 39: the two service-token operations on
     // `/opencompany/instances/{slug}/inference-key`. They are counted with the
@@ -177,13 +228,14 @@ fn generated_rust_routes_match_the_public_manifest() {
     // user-facing API, the writes take the admin service token.
     //
     // 42 -> 43: `POST /opencompany/instances/{slug}/usage`, the orchestrator's
-    // runtime-billing report. `operationCount` is unchanged at 234 because a
+    // runtime-billing report. It leaves `operationCount` untouched because a
     // service-token route never enters the public surface — it is excluded by
     // its security requirement rather than by name, so it lands here and
-    // nowhere else.
+    // nowhere else. The user-facing read of the same data is
+    // `GET /opencompany/instances/usage`, which is public.
     assert_eq!(manifest["source"]["excludedAdminOperationCount"], 43);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
-    assert_eq!(rust_routes.len(), 234);
+    assert_eq!(rust_routes.len(), 237);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
