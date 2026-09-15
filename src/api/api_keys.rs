@@ -6,10 +6,18 @@ use crate::{enc, Error, HttpClient};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
+/// What a key may reach, named by feature. `Connections` is machine-only and
+/// cannot be minted through `POST /api-keys`.
 pub enum ApiKeyScope {
-    Read,
-    Write,
     Inference,
+    Voice,
+    Search,
+    Media,
+    Storage,
+    Meetings,
+    Account,
+    Companies,
+    Connections,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -40,6 +48,9 @@ impl<'a> ApiKeysApi<'a> {
     }
 
     pub async fn create(&self, request: &CreateApiKeyRequest) -> Result<DynamicResponse, Error> {
+        if request.scopes.contains(&ApiKeyScope::Connections) {
+            return Err(Error::ScopeNotCreatable(ApiKeyScope::Connections));
+        }
         let body = serde_json::to_value(request).expect("API key request is serializable");
         self.http
             .send_typed(Method::POST, "/api-keys", &[], Some(&body), true)
