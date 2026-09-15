@@ -25,7 +25,7 @@ async fn typed_api_key_request_uses_openapi_field_names() {
         .await;
     let request = CreateApiKeyRequest {
         name: "CI".into(),
-        scopes: vec![ApiKeyScope::Inference],
+        scopes: vec![CreatableApiKeyScope::Inference],
         allowed_ips: vec!["10.0.0.0/8".into()],
         expires_at: None,
     };
