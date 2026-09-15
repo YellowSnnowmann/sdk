@@ -2,7 +2,10 @@
 
 use reqwest::Method;
 
-use super::types::{DynamicResponse, EmailLinkRequest, IntegrationTokenRequest, LoginTokenRequest};
+use super::types::{
+    DynamicResponse, EmailLinkRequest, IntegrationTokenRequest, LoginTokenRequest,
+    RedeemKeyGrantRequest,
+};
 use crate::{enc, Error, HttpClient, QueryParam};
 
 /// Typed client for the `/auth/*` routes.
