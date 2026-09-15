@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use serde_json::json;
-use tinyhumans_sdk::api::api_keys::{ApiKeyScope, CreateApiKeyRequest};
+use tinyhumans_sdk::api::api_keys::{CreatableApiKeyScope, CreateApiKeyRequest};
 use tinyhumans_sdk::api::medulla::{CreateTaskRequest, TaskStatus};
 use tinyhumans_sdk::generated_public_routes::PUBLIC_ROUTES;
 use tinyhumans_sdk::TinyHumansClient;
