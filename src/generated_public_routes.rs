@@ -284,6 +284,7 @@ pub(crate) const UNEXPOSED_ROUTES: &[(&str, &str)] = &[
     ("DELETE", "/invite/campaign/{codeId}"),
     ("DELETE", "/opencompany/instances/{slug}/inference-key"),
     ("POST", "/opencompany/instances/{slug}/inference-key"),
+    ("POST", "/opencompany/instances/{slug}/usage"),
     ("POST", "/voice-agent/chat/completions"),
     ("POST", "/webhooks/composio"),
     ("POST", "/webhooks/discord"),

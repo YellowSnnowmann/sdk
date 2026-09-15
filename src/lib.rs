@@ -537,7 +537,14 @@ mod exclusion_tests {
         // the admin dashboard drives with the admin service token. The two
         // public `/blog/posts` reads that arrived with them are ordinary
         // user-facing API and are exposed; only the authoring side is blocked.
-        assert_eq!(UNEXPOSED_ROUTES.len(), 54);
+        //
+        // 54 -> 55: `POST /opencompany/instances/{slug}/usage`, which the
+        // orchestrator calls to report how long each hosted company held its
+        // memory so the platform can bill it. Service-token authenticated like
+        // the two `inference-key` operations above, and excluded for the same
+        // reason: no SDK consumer holds the shared secret, and a client method
+        // for it would only ever produce a 401.
+        assert_eq!(UNEXPOSED_ROUTES.len(), 55);
         for (method, template) in UNEXPOSED_ROUTES {
             let concrete_path = template
                 .split('/')

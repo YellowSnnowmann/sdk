@@ -149,7 +149,13 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 39 -> 42: the three `/admin/blog-posts` writes that arrived with those
     // reads. Same change, opposite side of the line: the reads are ordinary
     // user-facing API, the writes take the admin service token.
-    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 42);
+    //
+    // 42 -> 43: `POST /opencompany/instances/{slug}/usage`, the orchestrator's
+    // runtime-billing report. `operationCount` is unchanged at 234 because a
+    // service-token route never enters the public surface — it is excluded by
+    // its security requirement rather than by name, so it lands here and
+    // nowhere else.
+    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 43);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
     assert_eq!(rust_routes.len(), 234);
     assert_eq!(rust_routes, manifest_routes);
