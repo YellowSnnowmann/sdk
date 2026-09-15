@@ -8,11 +8,11 @@
     "url": "https://api.tinyhumans.ai/swagger.json",
     "title": "TinyHumans API",
     "version": "1.0.0",
-    "pathCount": 250,
-    "totalOperationCount": 283,
-    "operationCount": 234,
+    "pathCount": 255,
+    "totalOperationCount": 288,
+    "operationCount": 238,
     "supplementalOperationCount": 14,
-    "excludedAdminOperationCount": 42,
+    "excludedAdminOperationCount": 43,
     "excludedWebhookOperationCount": 12,
     "servers": [
       "https://api.tinyhumans.ai/",
@@ -309,7 +309,7 @@
       "name": "medulla",
       "basePath": "/medulla",
       "auth": "bearer",
-      "operationCount": 26,
+      "operationCount": 27,
       "tags": [
         "Medulla"
       ],
@@ -320,6 +320,7 @@
         "DELETE /medulla/v1/tasks/{id}",
         "GET /medulla/v1/hosts",
         "GET /medulla/v1/hosts/entitlements",
+        "GET /medulla/v1/insights",
         "GET /medulla/v1/roster",
         "GET /medulla/v1/routing/strategy",
         "GET /medulla/v1/sessions",
@@ -346,7 +347,7 @@
       "name": "openCompany",
       "basePath": "/opencompany",
       "auth": "bearer",
-      "operationCount": 8,
+      "operationCount": 9,
       "tags": [
         "OpenCompany"
       ],
@@ -354,6 +355,7 @@
         "DELETE /opencompany/instances/{slug}",
         "DELETE /opencompany/instances/{slug}/custom-domain",
         "GET /opencompany/instances",
+        "GET /opencompany/instances/usage",
         "POST /opencompany/instances",
         "POST /opencompany/instances/{slug}/custom-domain/verify",
         "POST /opencompany/instances/{slug}/resume",
@@ -386,7 +388,7 @@
       "name": "payments",
       "basePath": "/payments",
       "auth": "mixed",
-      "operationCount": 20,
+      "operationCount": 22,
       "tags": [
         "Credits",
         "Payment",
@@ -398,6 +400,8 @@
         "GET /payments/credits/auto-recharge",
         "GET /payments/credits/auto-recharge/cards",
         "GET /payments/credits/balance",
+        "GET /payments/credits/ledger",
+        "GET /payments/credits/ledger/export",
         "GET /payments/credits/top-up/cancel",
         "GET /payments/credits/top-up/success",
         "GET /payments/credits/transactions",

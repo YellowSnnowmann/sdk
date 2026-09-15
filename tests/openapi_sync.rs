@@ -136,7 +136,14 @@ fn generated_rust_routes_match_the_public_manifest() {
 
     // 227 -> 229: the two public blog reads, `GET /blog/posts` and
     // `GET /blog/posts/{slug}`.
-    assert_eq!(manifest["source"]["operationCount"], 229);
+    //
+    // 229 -> 234: the API-key management and payments-summary routes that
+    // landed in the manifest without this count moving with them.
+    //
+    // 234 -> 238: the dashboard's usage reads — `GET /medulla/v1/insights`,
+    // `GET /opencompany/instances/usage`, `GET /payments/credits/ledger` and
+    // `GET /payments/credits/ledger/export`.
+    assert_eq!(manifest["source"]["operationCount"], 238);
     assert_eq!(manifest["source"]["supplementalOperationCount"], 14);
     // 37 -> 39: the two service-token operations on
     // `/opencompany/instances/{slug}/inference-key`. They are counted with the
@@ -146,9 +153,13 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 39 -> 42: the three `/admin/blog-posts` writes that arrived with those
     // reads. Same change, opposite side of the line: the reads are ordinary
     // user-facing API, the writes take the admin service token.
-    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 42);
+    //
+    // 42 -> 43: `POST /opencompany/instances/{slug}/usage`, the orchestrator's
+    // service-token runtime report. The user-facing read of the same data is
+    // `GET /opencompany/instances/usage`, which is public.
+    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 43);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
-    assert_eq!(rust_routes.len(), 229);
+    assert_eq!(rust_routes.len(), 238);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
