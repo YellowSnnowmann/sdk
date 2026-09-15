@@ -244,6 +244,7 @@ pub(crate) const UNEXPOSED_ROUTES: &[(&str, &str)] = &[
     ("POST", "/admin/announcements"),
     ("DELETE", "/admin/announcements/{announcementId}"),
     ("PATCH", "/admin/announcements/{announcementId}"),
+    ("POST", "/admin/blog-images"),
     ("POST", "/admin/blog-posts"),
     ("DELETE", "/admin/blog-posts/{blogPostId}"),
     ("PATCH", "/admin/blog-posts/{blogPostId}"),
