@@ -67,6 +67,15 @@ pub struct IntegrationTokenRequest {
     pub key: String,
 }
 
+/// Body for `POST /auth/keys`: redeems the one-time `code` from
+/// `GET /auth/key` plus the PKCE `code_verifier` the caller kept, for a
+/// freshly minted API key.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RedeemKeyGrantRequest {
+    pub code: String,
+    pub code_verifier: String,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum FeedbackType {
