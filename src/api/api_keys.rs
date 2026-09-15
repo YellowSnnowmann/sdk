@@ -39,6 +39,43 @@ pub enum CreatableApiKeyScope {
     Companies,
 }
 
+impl From<CreatableApiKeyScope> for ApiKeyScope {
+    fn from(scope: CreatableApiKeyScope) -> Self {
+        match scope {
+            CreatableApiKeyScope::Inference => Self::Inference,
+            CreatableApiKeyScope::Voice => Self::Voice,
+            CreatableApiKeyScope::Search => Self::Search,
+            CreatableApiKeyScope::Media => Self::Media,
+            CreatableApiKeyScope::Storage => Self::Storage,
+            CreatableApiKeyScope::Meetings => Self::Meetings,
+            CreatableApiKeyScope::Account => Self::Account,
+            CreatableApiKeyScope::Companies => Self::Companies,
+        }
+    }
+}
+
+/// Narrow a full [`ApiKeyScope`] (say, one read back from a listed key) to
+/// the create-request subset. Fails with [`Error::ScopeNotCreatable`] for
+/// `Connections`, so a caller learns why client-side instead of getting a
+/// 400 from the backend after the request already went out.
+impl TryFrom<ApiKeyScope> for CreatableApiKeyScope {
+    type Error = Error;
+
+    fn try_from(scope: ApiKeyScope) -> Result<Self, Error> {
+        Ok(match scope {
+            ApiKeyScope::Inference => Self::Inference,
+            ApiKeyScope::Voice => Self::Voice,
+            ApiKeyScope::Search => Self::Search,
+            ApiKeyScope::Media => Self::Media,
+            ApiKeyScope::Storage => Self::Storage,
+            ApiKeyScope::Meetings => Self::Meetings,
+            ApiKeyScope::Account => Self::Account,
+            ApiKeyScope::Companies => Self::Companies,
+            ApiKeyScope::Connections => return Err(Error::ScopeNotCreatable(scope)),
+        })
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateApiKeyRequest {

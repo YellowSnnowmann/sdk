@@ -1,10 +1,10 @@
 use std::collections::BTreeSet;
 
 use serde_json::json;
-use tinyhumans_sdk::api::api_keys::{CreatableApiKeyScope, CreateApiKeyRequest};
+use tinyhumans_sdk::api::api_keys::{ApiKeyScope, CreatableApiKeyScope, CreateApiKeyRequest};
 use tinyhumans_sdk::api::medulla::{CreateTaskRequest, TaskStatus};
 use tinyhumans_sdk::generated_public_routes::PUBLIC_ROUTES;
-use tinyhumans_sdk::TinyHumansClient;
+use tinyhumans_sdk::{Error, TinyHumansClient};
 use wiremock::matchers::{body_json, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
@@ -77,6 +77,35 @@ fn creatable_api_key_scope_excludes_the_machine_only_connections_scope() {
         )
     );
     assert!(!creatable_wire_values.contains("connections"));
+}
+
+#[test]
+fn create_api_key_rejects_the_machine_only_connections_scope() {
+    // `POST /api-keys` rejects a `connections` mint outright (see
+    // `HUMAN_MINTABLE_SCOPES` in the backend's `apiKey.ts`), so the SDK must
+    // catch this client-side rather than let the request go out and fail.
+    // `CreateApiKeyRequest.scopes` can't even hold `Connections`; the one
+    // way to get there from a full `ApiKeyScope` (say, copied off a listed
+    // key) is the fallible narrowing, which is where the error surfaces.
+    let err = CreatableApiKeyScope::try_from(ApiKeyScope::Connections).unwrap_err();
+    assert!(matches!(
+        err,
+        Error::ScopeNotCreatable(ApiKeyScope::Connections)
+    ));
+    // Every other scope narrows and widens back to itself.
+    for scope in [
+        ApiKeyScope::Inference,
+        ApiKeyScope::Voice,
+        ApiKeyScope::Search,
+        ApiKeyScope::Media,
+        ApiKeyScope::Storage,
+        ApiKeyScope::Meetings,
+        ApiKeyScope::Account,
+        ApiKeyScope::Companies,
+    ] {
+        let creatable = CreatableApiKeyScope::try_from(scope.clone()).unwrap();
+        assert_eq!(ApiKeyScope::from(creatable), scope);
+    }
 }
 
 #[tokio::test]
@@ -177,10 +206,11 @@ fn generated_rust_routes_match_the_public_manifest() {
         .collect::<BTreeSet<_>>();
     let rust_routes = PUBLIC_ROUTES.iter().copied().collect::<BTreeSet<_>>();
 
-    // 227 -> 229: the two public blog reads. 229 -> 230: the authenticated
-    // billing summary used by clients to render account credit state.
-    // 230 -> 234: the four `/auth/key*` grant routes (key issuance for
-    // desktop/harness clients), picked up when resyncing against the
+    // 227 -> 229: the two public blog reads, `GET /blog/posts` and
+    // `GET /blog/posts/{slug}`. 229 -> 230: `GET /payments/summary`, the
+    // authenticated billing summary used by clients to render account
+    // credit state. 230 -> 234: the four `/auth/key*` grant routes (key
+    // issuance for scoped API keys), picked up when resyncing against the
     // backend's teams-removal spec.
     //
     // 234 -> 237: the dashboard's usage reads —
