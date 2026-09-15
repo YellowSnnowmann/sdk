@@ -186,6 +186,81 @@ async fn oauth_connect_gets_with_query() {
 }
 
 #[tokio::test]
+async fn start_key_grant_sends_callback_url_and_extra_query() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/auth/key"))
+        .and(query_param("callback_url", "http://127.0.0.1:9999/cb"))
+        .and(query_param("mode", "manual"))
+        .respond_with(ok(json!({"redirect": true})))
+        .mount(&server)
+        .await;
+
+    let client = TinyHumansClient::new(server.uri());
+    let result = client
+        .auth()
+        .start_key_grant(
+            "http://127.0.0.1:9999/cb",
+            &[("mode", Some("manual".to_string()))],
+        )
+        .await
+        .unwrap();
+    assert_eq!(result, json!({"redirect": true}));
+}
+
+#[tokio::test]
+async fn redeem_key_grant_posts_code_and_verifier() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/auth/keys"))
+        .and(body_json(
+            json!({"code": "abc", "code_verifier": "verifier-of-at-least-43-characters!!"}),
+        ))
+        .respond_with(ok(json!({"key": "sk_live_1"})))
+        .mount(&server)
+        .await;
+
+    let client = TinyHumansClient::new(server.uri());
+    let result = client
+        .auth()
+        .redeem_key_grant(&RedeemKeyGrantRequest {
+            code: "abc".into(),
+            code_verifier: "verifier-of-at-least-43-characters!!".into(),
+        })
+        .await
+        .unwrap();
+    assert_eq!(result, json!({"key": "sk_live_1"}));
+}
+
+#[tokio::test]
+async fn describe_key_grant_gets_by_code() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/auth/key/grant/code_1"))
+        .respond_with(ok(json!({"origin": "https://tenant.tinyhumans.ai"})))
+        .mount(&server)
+        .await;
+
+    let client = TinyHumansClient::new(server.uri());
+    let result = client.auth().describe_key_grant("code_1").await.unwrap();
+    assert_eq!(result, json!({"origin": "https://tenant.tinyhumans.ai"}));
+}
+
+#[tokio::test]
+async fn issue_key_grant_posts_by_code() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/auth/key/grant/code_1/issue"))
+        .respond_with(ok(json!({"key": "sk_live_2"})))
+        .mount(&server)
+        .await;
+
+    let client = TinyHumansClient::new(server.uri());
+    let result = client.auth().issue_key_grant("code_1").await.unwrap();
+    assert_eq!(result, json!({"key": "sk_live_2"}));
+}
+
+#[tokio::test]
 async fn oauth_login_gets_with_query() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
