@@ -6,8 +6,11 @@ use crate::{enc, Error, HttpClient};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
-/// What a key may reach, named by feature. `Connections` is machine-only and
-/// cannot be minted through `POST /api-keys`.
+/// What a key may reach, named by feature. `Connections` is machine-only: the
+/// backend grants it automatically to a provisioned tenant origin during the
+/// `GET /auth/key` PKCE flow and never accepts it from `POST /api-keys`, so
+/// it is not a variant of [`CreatableApiKeyScope`], the type
+/// [`CreateApiKeyRequest`] actually uses.
 pub enum ApiKeyScope {
     Inference,
     Voice,
@@ -20,12 +23,28 @@ pub enum ApiKeyScope {
     Connections,
 }
 
+/// Scopes a caller may request when creating a key through `POST /api-keys`.
+/// A subset of [`ApiKeyScope`] that deliberately excludes `Connections`,
+/// which that endpoint rejects.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum CreatableApiKeyScope {
+    Inference,
+    Voice,
+    Search,
+    Media,
+    Storage,
+    Meetings,
+    Account,
+    Companies,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateApiKeyRequest {
     pub name: String,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub scopes: Vec<ApiKeyScope>,
+    pub scopes: Vec<CreatableApiKeyScope>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub allowed_ips: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
