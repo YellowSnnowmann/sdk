@@ -1,5 +1,7 @@
 use serde_json::json;
-use tinyhumans_sdk::api::types::{EmailLinkRequest, IntegrationTokenRequest, LoginTokenRequest};
+use tinyhumans_sdk::api::types::{
+    EmailLinkRequest, IntegrationTokenRequest, LoginTokenRequest, RedeemKeyGrantRequest,
+};
 use tinyhumans_sdk::TinyHumansClient;
 use wiremock::matchers::{body_json, method, path, query_param};
 use wiremock::{Mock, MockServer, ResponseTemplate};
