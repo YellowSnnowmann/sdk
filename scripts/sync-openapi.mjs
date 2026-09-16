@@ -63,6 +63,7 @@ const RETAINED_UNEXPOSED_ROUTES = [
   ["POST", "/admin/announcements"],
   ["DELETE", "/admin/announcements/{announcementId}"],
   ["PATCH", "/admin/announcements/{announcementId}"],
+  ["POST", "/admin/blog-images"],
   ["POST", "/admin/coupons"],
   ["DELETE", "/admin/coupons/{couponId}"],
   ["PATCH", "/admin/coupons/{couponId}"],

@@ -16,10 +16,6 @@ pub mod outbound {
     pub const AGENT_SAY: &str = "agent:say";
     pub const AGENT_STOP: &str = "agent:stop";
 
-    pub const ORCH_EFFECT_RESULT: &str = "orch:effect:result";
-    pub const ORCH_TOOL_RESULT: &str = "orch:tool_result";
-    pub const ORCH_REGISTER_TOOLS: &str = "orch:register_tools";
-
     pub const WEBRTC_START: &str = "webrtc:start";
     pub const WEBRTC_ANSWER: &str = "webrtc:answer";
     pub const WEBRTC_ICE: &str = "webrtc:ice";
@@ -59,10 +55,6 @@ pub mod inbound {
     pub const AGENT_VIDEO_START: &str = "agent:video:start";
     pub const AGENT_VIDEO_CHUNK: &str = "agent:video:chunk";
     pub const AGENT_VIDEO_END: &str = "agent:video:end";
-
-    pub const ORCH_EFFECT_SEND_DM: &str = "orch:effect:send_dm";
-    pub const ORCH_EFFECT_EVICT: &str = "orch:effect:evict";
-    pub const ORCH_TOOL_CALL: &str = "orch:tool_call";
 
     pub const WEBRTC_OFFER: &str = "webrtc:offer";
     pub const WEBRTC_ICE: &str = "webrtc:ice";
