@@ -209,6 +209,26 @@ async fn start_key_grant_sends_callback_url_and_extra_query() {
 }
 
 #[tokio::test]
+async fn start_key_grant_with_scopes_sends_requested_scopes() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/auth/key"))
+        .and(query_param("callback_url", "http://127.0.0.1:9999/cb"))
+        .and(query_param("scopes", "connections"))
+        .respond_with(ok(json!({"redirect": true})))
+        .mount(&server)
+        .await;
+
+    let client = TinyHumansClient::new(server.uri());
+    let result = client
+        .auth()
+        .start_key_grant_with_scopes("http://127.0.0.1:9999/cb", &["connections"], &[])
+        .await
+        .unwrap();
+    assert_eq!(result, json!({"redirect": true}));
+}
+
+#[tokio::test]
 async fn redeem_key_grant_posts_code_and_verifier() {
     let server = MockServer::start().await;
     Mock::given(method("POST"))

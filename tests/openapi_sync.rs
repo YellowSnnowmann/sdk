@@ -2,7 +2,6 @@ use std::collections::BTreeSet;
 
 use serde_json::json;
 use tinyhumans_sdk::api::api_keys::{ApiKeyScope, CreatableApiKeyScope, CreateApiKeyRequest};
-use tinyhumans_sdk::api::medulla::{CreateTaskRequest, TaskStatus};
 use tinyhumans_sdk::generated_public_routes::PUBLIC_ROUTES;
 use tinyhumans_sdk::{Error, TinyHumansClient};
 use wiremock::matchers::{body_json, method, path};
@@ -109,83 +108,16 @@ fn create_api_key_rejects_the_machine_only_connections_scope() {
 }
 
 #[tokio::test]
-async fn medulla_task_status_serializes_in_camel_case() {
-    let server = MockServer::start().await;
-    Mock::given(method("POST"))
-        .and(path("/medulla/v1/tasks"))
-        .and(body_json(json!({"title":"Ship","status":"inProgress"})))
-        // `create_task` now decodes a typed `Task`, so the stub returns the
-        // route's real `{"task": {...}}` payload rather than a placeholder.
-        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
-            "success": true,
-            "data": { "task": {
-                "id": "task-1",
-                "title": "Ship",
-                "description": "",
-                "status": "inProgress",
-                "createdAt": "2026-07-29T00:00:00Z",
-                "updatedAt": "2026-07-29T00:00:00Z",
-            }},
-        })))
-        .mount(&server)
-        .await;
-    let request = CreateTaskRequest {
-        title: "Ship".into(),
-        description: None,
-        status: Some(TaskStatus::InProgress),
-        recurrence: None,
-    };
-    let task = TinyHumansClient::new(server.uri())
-        .medulla()
-        .create_task(&request)
-        .await
-        .unwrap();
-    assert_eq!(task.status, TaskStatus::InProgress);
-}
-
-#[tokio::test]
-async fn medulla_workflows_returns_advertised_catalog() {
+async fn path_segments_are_encoded_on_typed_routes() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
-        .and(path("/medulla/v1/workflows"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
-            "success": true,
-            "data": {
-                "workflows": [{
-                    "id": "release",
-                    "name": "Release",
-                    "nodeCount": 4,
-                    "enabled": true,
-                    "agentId": "agent-1"
-                }]
-            }
-        })))
-        .mount(&server)
-        .await;
-
-    let workflows = TinyHumansClient::new(server.uri())
-        .medulla()
-        .workflows()
-        .await
-        .unwrap();
-
-    assert_eq!(workflows.len(), 1);
-    assert_eq!(workflows[0].id, "release");
-    assert_eq!(workflows[0].node_count, 4);
-    assert_eq!(workflows[0].agent_id.as_deref(), Some("agent-1"));
-}
-
-#[tokio::test]
-async fn path_segments_are_encoded_on_new_namespaces() {
-    let server = MockServer::start().await;
-    Mock::given(method("GET"))
-        .and(path("/orchestration/v1/sessions/a%2Fb/messages"))
+        .and(path("/feedback/a%2Fb"))
         .respond_with(ok())
         .mount(&server)
         .await;
     TinyHumansClient::new(server.uri())
-        .orchestration()
-        .session_messages("a/b", &[])
+        .feedback()
+        .get_feedback("a/b")
         .await
         .unwrap();
 }
@@ -217,11 +149,16 @@ fn generated_rust_routes_match_the_public_manifest() {
     // `GET /opencompany/instances/usage`, `GET /payments/credits/ledger` and
     // `GET /payments/credits/ledger/export`.
     //
-    // 237 -> 238: `GET /payments/credits/lots`, the caller's live credit lots
+    // 237 -> 202: the `/medulla/v1/*` and `/orchestration/v1/*` families are
+    // gone with the orchestration model. The backend's part in Medulla is now
+    // the plan entitlement on `/auth/me`; nothing under those prefixes is
+    // served any more.
+    // 202 -> 203: `GET /payments/credits/lots`, the caller's live credit lots
     // and their expiries (subscription credit no longer rolls over; top-ups
     // last a year).
-    assert_eq!(manifest["source"]["operationCount"], 238);
-    assert_eq!(manifest["source"]["supplementalOperationCount"], 14);
+    assert_eq!(manifest["source"]["operationCount"], 203);
+    // 14 -> 13: `GET /orchestration/v1/steering` left with that family.
+    assert_eq!(manifest["source"]["supplementalOperationCount"], 13);
     // 37 -> 39: the two service-token operations on
     // `/opencompany/instances/{slug}/inference-key`. They are counted with the
     // admin exclusions because that tally is derived from `excludedOperations`,
@@ -242,7 +179,7 @@ fn generated_rust_routes_match_the_public_manifest() {
     // post's cover and body figures. Same token as the other blog writes.
     assert_eq!(manifest["source"]["excludedAdminOperationCount"], 44);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
-    assert_eq!(rust_routes.len(), 238);
+    assert_eq!(rust_routes.len(), 203);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()

@@ -86,6 +86,23 @@ impl<'a> AuthApi<'a> {
             .await
     }
 
+    /// Start a PKCE key grant with explicitly requested API-key scopes.
+    ///
+    /// `connections` is granted to a loopback callback only when it is named
+    /// here. Provisioned tenant origins receive it regardless of this list.
+    pub async fn start_key_grant_with_scopes(
+        &self,
+        callback_url: &str,
+        scopes: &[&str],
+        query: &[QueryParam],
+    ) -> Result<DynamicResponse, Error> {
+        let mut full_query = query.to_vec();
+        if !scopes.is_empty() {
+            full_query.push(("scopes", Some(scopes.join(","))));
+        }
+        self.start_key_grant(callback_url, &full_query).await
+    }
+
     /// Redeem a PKCE key grant for an API key (`mode=code` flow).
     /// Unauthenticated: possession of the `code_verifier` is the proof.
     /// Returns the plaintext key exactly once, in `data.key`.
