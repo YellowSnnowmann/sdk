@@ -47,10 +47,7 @@ impl<'a> TeamsApi<'a> {
 
     /// Get usage and spend insights for a specific range (`cycle`, `7d`,
     /// `30d`, or `90d`).
-    pub async fn get_my_usage_for_range(
-        &self,
-        range: &str,
-    ) -> Result<DynamicResponse, Error> {
+    pub async fn get_my_usage_for_range(&self, range: &str) -> Result<DynamicResponse, Error> {
         let query = [("range", Some(range.to_string()))];
         self.http
             .send_typed(Method::GET, "/teams/me/usage", &query, None, true)
