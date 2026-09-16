@@ -33,8 +33,8 @@ agent-integration platform. The SDK should expose these API families cleanly:
   media generation, financial APIs, maps, Apify, Tenor, Twilio, crypto, and
   the direct OpenRouter proxy.
 - Telegram/Discord channel integration routes under `/channels/*`.
-- Feedback, invites, referrals, rewards, announcements, mascots, Medulla,
-  OpenCompany, and orchestration routes.
+- Feedback, invites, referrals, rewards, announcements, mascots, and
+  OpenCompany routes.
 
 Administrative routes and webhook *receivers* are intentionally excluded,
 including legacy operations outside `/admin` whose deployed OpenAPI summary

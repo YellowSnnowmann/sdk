@@ -16,17 +16,6 @@ pub mod outbound {
     pub const AGENT_SAY: &str = "agent:say";
     pub const AGENT_STOP: &str = "agent:stop";
 
-    pub const ORCH_EFFECT_RESULT: &str = "orch:effect:result";
-    pub const ORCH_TOOL_RESULT: &str = "orch:tool_result";
-    pub const ORCH_REGISTER_TOOLS: &str = "orch:register_tools";
-
-    pub const MEDULLA_REGISTER_AGENTS: &str = "medulla:register_agents";
-    pub const MEDULLA_REGISTER_WORKFLOWS: &str = "medulla:register_workflows";
-    pub const MEDULLA_TASK_ENVELOPE: &str = "medulla:task_envelope";
-    pub const MEDULLA_TASK_RESULT: &str = "medulla:task_result";
-    pub const MEDULLA_CAPABILITIES_RESULT: &str = "medulla:capabilities_result";
-    pub const MEDULLA_WORKFLOW_RESULT: &str = "medulla:workflow_result";
-
     pub const WEBRTC_START: &str = "webrtc:start";
     pub const WEBRTC_ANSWER: &str = "webrtc:answer";
     pub const WEBRTC_ICE: &str = "webrtc:ice";
@@ -66,17 +55,6 @@ pub mod inbound {
     pub const AGENT_VIDEO_START: &str = "agent:video:start";
     pub const AGENT_VIDEO_CHUNK: &str = "agent:video:chunk";
     pub const AGENT_VIDEO_END: &str = "agent:video:end";
-
-    pub const ORCH_EFFECT_SEND_DM: &str = "orch:effect:send_dm";
-    pub const ORCH_EFFECT_EVICT: &str = "orch:effect:evict";
-    pub const ORCH_TOOL_CALL: &str = "orch:tool_call";
-
-    pub const MEDULLA_TASK_RUN: &str = "medulla:task_run";
-    pub const MEDULLA_TASK_SEND: &str = "medulla:task_send";
-    pub const MEDULLA_TASK_ABORT: &str = "medulla:task_abort";
-    pub const MEDULLA_CAPABILITIES_REQUEST: &str = "medulla:capabilities_request";
-    pub const MEDULLA_WORKFLOW_REQUEST: &str = "medulla:workflow_request";
-    pub const MEDULLA_EVENT: &str = "medulla:event";
 
     pub const WEBRTC_OFFER: &str = "webrtc:offer";
     pub const WEBRTC_ICE: &str = "webrtc:ice";
