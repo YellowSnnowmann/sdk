@@ -153,6 +153,7 @@ pub const PUBLIC_ROUTES: &[(&str, &str)] = &[
     ("GET", "/payments/credits/balance"),
     ("GET", "/payments/credits/ledger"),
     ("GET", "/payments/credits/ledger/export"),
+    ("GET", "/payments/credits/lots"),
     ("POST", "/payments/credits/top-up"),
     ("GET", "/payments/credits/top-up/cancel"),
     ("GET", "/payments/credits/top-up/success"),

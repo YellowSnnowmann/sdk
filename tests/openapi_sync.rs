@@ -153,7 +153,10 @@ fn generated_rust_routes_match_the_public_manifest() {
     // gone with the orchestration model. The backend's part in Medulla is now
     // the plan entitlement on `/auth/me`; nothing under those prefixes is
     // served any more.
-    assert_eq!(manifest["source"]["operationCount"], 202);
+    // 202 -> 203: `GET /payments/credits/lots`, the caller's live credit lots
+    // and their expiries (subscription credit no longer rolls over; top-ups
+    // last a year).
+    assert_eq!(manifest["source"]["operationCount"], 203);
     // 14 -> 13: `GET /orchestration/v1/steering` left with that family.
     assert_eq!(manifest["source"]["supplementalOperationCount"], 13);
     // 37 -> 39: the two service-token operations on
@@ -176,7 +179,7 @@ fn generated_rust_routes_match_the_public_manifest() {
     // post's cover and body figures. Same token as the other blog writes.
     assert_eq!(manifest["source"]["excludedAdminOperationCount"], 44);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
-    assert_eq!(rust_routes.len(), 202);
+    assert_eq!(rust_routes.len(), 203);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
