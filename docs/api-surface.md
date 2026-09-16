@@ -34,9 +34,7 @@ namespace.
 | `agentIntegrations` | `/agent-integrations` | bearer | Composio, Parallel, media generation, maps, Apify, Twilio, crypto, OpenRouter |
 | `apiKeys` | `/api-keys` | bearer | create, list, and revoke user API keys |
 | `budgets` | `/budgets` | bearer | team budgets and seat allocations |
-| `medulla` | `/medulla` | bearer | roster, workflow adverts, routing, sessions, messages, tasks, and sources |
 | `openCompany` | `/opencompany` | bearer | company instances, lifecycle, and custom domains |
-| `orchestration` | `/orchestration` | bearer | runs, events, sessions, state, and world diffs |
 | `payments` | `/payments` | bearer | Stripe, Coinbase, credits, transactions, plans |
 | `feedback` | `/feedback` | bearer | create, ingest, list, detail, vote, and comments |
 | `teams` | `/teams` | bearer | personal-team detail, usage, and billing; membership/invite routes are retired (`410`) |
