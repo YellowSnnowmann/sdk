@@ -45,6 +45,55 @@ pub struct CreditTopUpRequest {
     pub gateway: Option<PaymentGateway>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum CreditLotKind {
+    Subscription,
+    Topup,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum CreditLotStatus {
+    Active,
+    Exhausted,
+    Expired,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum CreditLotGateway {
+    Stripe,
+    Coinbase,
+    Admin,
+    Migration,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct CreditLotSource {
+    pub gateway: CreditLotGateway,
+    #[serde(rename = "ref")]
+    pub reference: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct CreditLot {
+    pub id: String,
+    pub kind: CreditLotKind,
+    pub status: CreditLotStatus,
+    pub amount_usd: f64,
+    pub remaining_usd: f64,
+    pub granted_at: String,
+    pub expires_at: String,
+    pub source: CreditLotSource,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct CreditLotsResponse {
+    pub lots: Vec<CreditLot>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct AutoRechargeRequest {
@@ -223,11 +272,10 @@ impl<'a> PaymentsApi<'a> {
     /// The current user's live credit lots and when each one expires.
     /// Subscription credit lapses at the end of the paid period (no rollover);
     /// top-up credit a year after purchase.
-    pub async fn get_credit_lots(&self) -> Result<DynamicResponse, Error> {
+    pub async fn get_credit_lots(&self) -> Result<CreditLotsResponse, Error> {
         self.http
-            .send(Method::GET, "/payments/credits/lots", &[], None, true)
+            .send_typed(Method::GET, "/payments/credits/lots", &[], None, true)
             .await
-            .map(Into::into)
     }
 
     /// One page of the caller's credit ledger, newest first. Accepts
