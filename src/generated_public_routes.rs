@@ -167,6 +167,7 @@ pub const PUBLIC_ROUTES: &[(&str, &str)] = &[
     ("POST", "/opencompany/instances/{slug}/custom-domain/verify"),
     ("POST", "/opencompany/instances/{slug}/resume"),
     ("POST", "/opencompany/instances/{slug}/suspend"),
+    ("POST", "/opencompany/instances/{slug}/update"),
     ("GET", "/opencompany/instances/usage"),
     ("POST", "/orchestration/v1/events"),
     ("POST", "/orchestration/v1/run"),
