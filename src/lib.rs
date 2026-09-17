@@ -16,7 +16,6 @@ pub mod generated_public_routes;
 pub mod jwt;
 #[cfg(feature = "socket")]
 pub mod socket;
-pub mod sse;
 
 /// Bytes left un-encoded by `encodeURIComponent`: the unreserved set
 /// `A-Z a-z 0-9 - _ . ! ~ * ' ( )`.
@@ -195,14 +194,8 @@ impl TinyHumansClient {
     pub fn mascots(&self) -> api::mascots::MascotsApi<'_> {
         api::mascots::MascotsApi::new(&self.http)
     }
-    pub fn medulla(&self) -> api::medulla::MedullaApi<'_> {
-        api::medulla::MedullaApi::new(&self.http)
-    }
     pub fn opencompany(&self) -> api::opencompany::OpenCompanyApi<'_> {
         api::opencompany::OpenCompanyApi::new(&self.http)
-    }
-    pub fn orchestration(&self) -> api::orchestration::OrchestrationApi<'_> {
-        api::orchestration::OrchestrationApi::new(&self.http)
     }
     pub fn payments(&self) -> api::payments::PaymentsApi<'_> {
         api::payments::PaymentsApi::new(&self.http)
@@ -226,8 +219,7 @@ impl TinyHumansClient {
     /// Connect to the authenticated Socket.IO surface at `/socket.io/`.
     ///
     /// The returned connection receives every public socket event through one
-    /// generic stream and also exposes typed helpers for the Medulla harness
-    /// and workflow protocol.
+    /// generic stream.
     #[cfg(feature = "socket")]
     pub async fn connect_socket(&self) -> Result<socket::SocketConnection, Error> {
         let token = self.http.token.clone().ok_or(Error::MissingSocketToken)?;
