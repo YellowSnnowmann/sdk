@@ -156,7 +156,9 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 202 -> 203: `GET /payments/credits/lots`, the caller's live credit lots
     // and their expiries (subscription credit no longer rolls over; top-ups
     // last a year).
-    assert_eq!(manifest["source"]["operationCount"], 203);
+    // 203 -> 204: `POST /opencompany/instances/{slug}/update`, the
+    // owner-triggered "update to latest" for a hosted company.
+    assert_eq!(manifest["source"]["operationCount"], 204);
     // 14 -> 13: `GET /orchestration/v1/steering` left with that family.
     assert_eq!(manifest["source"]["supplementalOperationCount"], 13);
     // 37 -> 39: the two service-token operations on
@@ -179,7 +181,7 @@ fn generated_rust_routes_match_the_public_manifest() {
     // post's cover and body figures. Same token as the other blog writes.
     assert_eq!(manifest["source"]["excludedAdminOperationCount"], 44);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
-    assert_eq!(rust_routes.len(), 203);
+    assert_eq!(rust_routes.len(), 204);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
