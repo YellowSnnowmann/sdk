@@ -10,8 +10,8 @@
     "version": "1.0.0",
     "pathCount": 235,
     "totalOperationCount": 260,
-    "operationCount": 207,
-    "supplementalOperationCount": 14,
+    "operationCount": 206,
+    "supplementalOperationCount": 13,
     "excludedAdminOperationCount": 46,
     "excludedWebhookOperationCount": 12,
     "servers": [
@@ -326,18 +326,6 @@
         "POST /opencompany/instances/{slug}/resume",
         "POST /opencompany/instances/{slug}/suspend",
         "PUT /opencompany/instances/{slug}/custom-domain"
-      ]
-    },
-    {
-      "name": "orchestration",
-      "basePath": "/orchestration",
-      "auth": "bearer",
-      "operationCount": 1,
-      "tags": [
-        "OpenHuman parity"
-      ],
-      "routes": [
-        "GET /orchestration/v1/steering"
       ]
     },
     {
