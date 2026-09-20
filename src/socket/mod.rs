@@ -4,7 +4,7 @@
 //! WebSocket endpoint. [`SocketConnection`] owns the protocol connection,
 //! automatically reconnects after network failures, exposes all event names
 //! through [`SocketConnection::next_event`], and supports JSON, binary, and
-//! acknowledgement-based emits. Typed Medulla helpers live in [`medulla`].
+//! acknowledgement-based emits.
 
 use std::fmt;
 use std::sync::{Arc, Mutex};
@@ -21,7 +21,6 @@ use tokio::sync::{mpsc, oneshot};
 use crate::Error;
 
 pub mod events;
-pub mod medulla;
 
 /// A Socket.IO event payload.
 ///

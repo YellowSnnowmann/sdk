@@ -333,6 +333,36 @@ async fn list_credit_transactions_sends_query() {
 }
 
 #[tokio::test]
+async fn get_credit_lots_unwraps() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/payments/credits/lots"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": true,
+            "data": {"lots": [{
+                "id": "lot-1",
+                "kind": "SUBSCRIPTION",
+                "status": "ACTIVE",
+                "amountUsd": 22,
+                "remainingUsd": 22,
+                "grantedAt": "2026-09-01T00:00:00.000Z",
+                "expiresAt": "2026-10-01T00:00:00.000Z",
+                "source": {"gateway": "stripe", "ref": "invoice-1"}
+            }]}
+        })))
+        .mount(&server)
+        .await;
+
+    let client = TinyHumansClient::new(server.uri());
+    let result = client.payments().get_credit_lots().await.unwrap();
+
+    assert_eq!(result.lots.len(), 1);
+    assert_eq!(result.lots[0].id, "lot-1");
+    assert_eq!(result.lots[0].remaining_usd, 22.0);
+    assert_eq!(result.lots[0].source.reference, "invoice-1");
+}
+
+#[tokio::test]
 async fn get_credit_ledger_sends_query() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
