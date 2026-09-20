@@ -51,6 +51,8 @@ pub const PUBLIC_ROUTES: &[(&str, &str)] = &[
     ("GET", "/agent-integrations/openrouter/images/models"),
     ("POST", "/agent-integrations/openrouter/messages"),
     ("GET", "/agent-integrations/openrouter/models"),
+    ("POST", "/agent-integrations/openrouter/systemone"),
+    ("POST", "/agent-integrations/openrouter/v1/systemone"),
     ("POST", "/agent-integrations/openrouter/videos"),
     ("GET", "/agent-integrations/openrouter/videos/{jobId}"),
     ("GET", "/agent-integrations/openrouter/videos/{jobId}/content"),

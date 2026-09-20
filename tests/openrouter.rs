@@ -218,6 +218,45 @@ async fn messages_speaks_the_anthropic_shape() {
 }
 
 #[tokio::test]
+async fn system_one_preserves_the_typesafe_wire_shape() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/agent-integrations/openrouter/systemone"))
+        .and(body_json(json!({
+            "model": "jev-latest",
+            "state": {"ticket": "I was charged twice"},
+            "questions": {
+                "refund": {"type": "noul", "instructions": "Is a refund requested?"}
+            }
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "id": "gen-dec-1",
+            "model": "typesafe/jev-1.13-20260917",
+            "provider": "TypeSafe",
+            "answers": {"refund": {"type": "noul", "noul": 0.98}},
+            "usage": {"input_tokens": 275, "output_tokens": 20, "cost": 0.00003}
+        })))
+        .mount(&server)
+        .await;
+
+    let response = TinyHumansClient::new(server.uri())
+        .agent_integrations()
+        .openrouter_system_one(&json!({
+            "model": "jev-latest",
+            "state": {"ticket": "I was charged twice"},
+            "questions": {
+                "refund": {"type": "noul", "instructions": "Is a refund requested?"}
+            }
+        }))
+        .await
+        .unwrap();
+
+    assert_eq!(response["answers"]["refund"]["type"], "noul");
+    assert_eq!(response["answers"]["refund"]["noul"], 0.98);
+    assert_eq!(response["usage"]["cost"], 0.00003);
+}
+
+#[tokio::test]
 async fn embedding_models_come_from_their_own_catalog() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
