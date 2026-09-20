@@ -33,7 +33,6 @@ const SUPPLEMENTAL_PUBLIC_OPERATIONS = [
   ["POST", "/agent-integrations/tinyfish/agent/run"],
   ["POST", "/agent-integrations/tinyfish/fetch"],
   ["POST", "/agent-integrations/tinyfish/search"],
-  ["GET", "/orchestration/v1/steering"],
   ["PUT", "/teams/{teamId}"],
   ["DELETE", "/teams/{teamId}/members/{userId}"],
   ["PUT", "/teams/{teamId}/members/{userId}/role"],
@@ -52,9 +51,19 @@ const SUPPLEMENTAL_PUBLIC_OPERATIONS = [
 // derived from it. They are declared here so regeneration retains the filter
 // instead of silently emptying the denylist and opening the raw transport.
 const RETAINED_UNEXPOSED_ROUTES = [
+  // Service-token operations. `isServiceTokenOperation` catches these when the
+  // spec still describes them -- a `--input` run against a local checkout's RAW
+  // document. A bare run fetches the DEPLOYED spec, where `publicSwaggerSpec`
+  // has already stripped them, so there is nothing left to detect and the
+  // denylist would quietly lose them: exactly the regression the rest of this
+  // list exists to prevent. Declared here so both paths agree.
+  ["POST", "/opencompany/instances/{slug}/inference-key"],
+  ["DELETE", "/opencompany/instances/{slug}/inference-key"],
+  ["POST", "/opencompany/instances/{slug}/usage"],
   ["POST", "/admin/announcements"],
   ["DELETE", "/admin/announcements/{announcementId}"],
   ["PATCH", "/admin/announcements/{announcementId}"],
+  ["POST", "/admin/blog-images"],
   ["POST", "/admin/coupons"],
   ["DELETE", "/admin/coupons/{couponId}"],
   ["PATCH", "/admin/coupons/{couponId}"],
@@ -88,12 +97,6 @@ const RETAINED_UNEXPOSED_ROUTES = [
   ["DELETE", "/invite/campaign/{codeId}"],
   ["POST", "/webhooks/composio"],
   ["POST", "/webhooks/discord"],
-  // Service-token callbacks (see isServiceTokenOperation): hidden from the
-  // served spec like the admin routes, so retained here the same way.
-  ["POST", "/internal/discord/link"],
-  ["DELETE", "/internal/discord/link/{userId}"],
-  ["POST", "/opencompany/instances/{slug}/inference-key"],
-  ["DELETE", "/opencompany/instances/{slug}/inference-key"],
   ["POST", "/webhooks/github"],
   ["POST", "/webhooks/ingress/{uuid}"],
   ["POST", "/webhooks/ingress/{uuid}/{path}"],
@@ -197,11 +200,13 @@ function isCustomLlmSecretOperation(operation) {
   return security.some((entry) => Object.hasOwn(entry, "customLlmSecret"));
 }
 
-// Service-to-service routes (`/internal/*`, the orchestrator callbacks): the
-// caller is another backend holding a shared secret, never a user with a
-// bearer token, so a client SDK has nothing to send. The backend already hides
-// these from its served Swagger; a spec dumped from a checkout still lists
-// them, so classify by the security scheme rather than by path.
+/**
+ * Secured by the shared service token two backend services hold in common
+ * (`OPENCOMPANY_SERVICE_TOKEN`), not by anything a user of this SDK can obtain.
+ * Same category as `customLlmSecret` above: a caller of this client cannot
+ * authenticate to it, so generating a method for it describes a surface that
+ * can only 401.
+ */
 function isServiceTokenOperation(operation) {
   const security = operation.security ?? [];
   return security.some((entry) => Object.hasOwn(entry, "serviceToken"));
@@ -258,7 +263,11 @@ function buildManifest(spec) {
       // a user token, so it is not part of the public client surface. Counted
       // with the admin exclusions below, which are derived from
       // `excludedOperations` rather than tallied here.
-      if (isCustomLlmSecretOperation(operation) || isServiceTokenOperation(operation)) {
+      if (isCustomLlmSecretOperation(operation)) {
+        excludedOperations.push({ method: method.toUpperCase(), path });
+        continue;
+      }
+      if (isServiceTokenOperation(operation)) {
         excludedOperations.push({ method: method.toUpperCase(), path });
         continue;
       }
