@@ -180,7 +180,13 @@ fn generated_rust_routes_match_the_public_manifest() {
     //
     // 43 -> 44: `POST /admin/blog-images`, the multipart upload behind a
     // post's cover and body figures. Same token as the other blog writes.
-    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 44);
+    //
+    // 44 -> 46: `POST /internal/discord/link` and
+    // `DELETE /internal/discord/link/{userId}`, the teeny Discord service's
+    // account-link callbacks, gated by GUILD_SERVICE_TOKEN. Service-token
+    // routes, so they land here and never in the public surface; the
+    // user-facing half of that flow is `POST /auth/guild/link-token`.
+    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 46);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
     assert_eq!(rust_routes.len(), 206);
     assert_eq!(rust_routes, manifest_routes);

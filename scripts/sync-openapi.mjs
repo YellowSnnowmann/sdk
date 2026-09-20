@@ -60,6 +60,9 @@ const RETAINED_UNEXPOSED_ROUTES = [
   ["POST", "/opencompany/instances/{slug}/inference-key"],
   ["DELETE", "/opencompany/instances/{slug}/inference-key"],
   ["POST", "/opencompany/instances/{slug}/usage"],
+  // Guild (teeny Discord service) callbacks, gated by GUILD_SERVICE_TOKEN.
+  ["POST", "/internal/discord/link"],
+  ["DELETE", "/internal/discord/link/{userId}"],
   ["POST", "/admin/announcements"],
   ["DELETE", "/admin/announcements/{announcementId}"],
   ["PATCH", "/admin/announcements/{announcementId}"],

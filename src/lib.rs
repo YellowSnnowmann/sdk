@@ -548,7 +548,13 @@ mod exclusion_tests {
         // 55 -> 56: `POST /admin/blog-images`, the multipart upload the
         // dashboard uses for a post's cover and body figures. Same service
         // token as the other blog writes, so it is blocked alongside them.
-        assert_eq!(UNEXPOSED_ROUTES.len(), 56);
+        //
+        // 56 -> 58: the teeny Discord service (the guild) calls back into the
+        // backend on `POST /internal/discord/link` and
+        // `DELETE /internal/discord/link/{userId}`, both gated by a shared
+        // service token rather than a user bearer, so they are unexposed like
+        // the orchestrator's inference-key callbacks.
+        assert_eq!(UNEXPOSED_ROUTES.len(), 58);
         for (method, template) in UNEXPOSED_ROUTES {
             let concrete_path = template
                 .split('/')
