@@ -8,11 +8,11 @@
     "url": "https://api.tinyhumans.ai/swagger.json",
     "title": "TinyHumans API",
     "version": "1.0.0",
-    "pathCount": 233,
-    "totalOperationCount": 258,
-    "operationCount": 206,
-    "supplementalOperationCount": 13,
-    "excludedAdminOperationCount": 44,
+    "pathCount": 235,
+    "totalOperationCount": 260,
+    "operationCount": 207,
+    "supplementalOperationCount": 14,
+    "excludedAdminOperationCount": 46,
     "excludedWebhookOperationCount": 12,
     "servers": [
       "https://api.tinyhumans.ai/",
@@ -148,7 +148,7 @@
       "name": "auth",
       "basePath": "/auth",
       "auth": "mixed",
-      "operationCount": 15,
+      "operationCount": 16,
       "tags": [
         "Auth"
       ],
@@ -164,6 +164,7 @@
         "GET /auth/{provider}/login",
         "POST /auth/channels/{channel}/link-token",
         "POST /auth/email/send-link",
+        "POST /auth/guild/link-token",
         "POST /auth/integrations/{integrationId}/tokens",
         "POST /auth/key/grant/{code}/issue",
         "POST /auth/keys",
@@ -311,7 +312,7 @@
       "name": "openCompany",
       "basePath": "/opencompany",
       "auth": "bearer",
-      "operationCount": 10,
+      "operationCount": 9,
       "tags": [
         "OpenCompany"
       ],
@@ -324,8 +325,19 @@
         "POST /opencompany/instances/{slug}/custom-domain/verify",
         "POST /opencompany/instances/{slug}/resume",
         "POST /opencompany/instances/{slug}/suspend",
-        "POST /opencompany/instances/{slug}/update",
         "PUT /opencompany/instances/{slug}/custom-domain"
+      ]
+    },
+    {
+      "name": "orchestration",
+      "basePath": "/orchestration",
+      "auth": "bearer",
+      "operationCount": 1,
+      "tags": [
+        "OpenHuman parity"
+      ],
+      "routes": [
+        "GET /orchestration/v1/steering"
       ]
     },
     {
