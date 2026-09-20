@@ -9,10 +9,11 @@
 //! [`DynamicResponse`], matching how [`crate::api::inference`] treats the
 //! OpenAI-compatible surface.
 //!
-//! Four request shapes share the one provider:
+//! Five request shapes share the one provider:
 //!
 //! - OpenAI chat and text completions.
 //! - Anthropic-format messages, which the Anthropic SDK can call directly.
+//! - TypeSafe System One requests for Jev typed decisions.
 //! - Embeddings, which resolve against a **separate** upstream catalog — an
 //!   embedding slug is not valid on the chat routes, or vice versa.
 //! - Image and video generation, billed per generation rather than per token
@@ -179,6 +180,19 @@ impl AgentIntegrationsApi<'_> {
         request: &impl Serialize,
     ) -> Result<DynamicResponse, Error> {
         self.passthrough("/agent-integrations/openrouter/messages", request)
+            .await
+    }
+
+    /// Evaluate typed questions with a Jev System One model.
+    ///
+    /// The request and response use TypeSafe's wire shape. For a fully typed
+    /// client, point `tinyjevclient` at the companion `/v1/systemone` alias by
+    /// using `/agent-integrations/openrouter` as its base URL.
+    pub async fn openrouter_system_one(
+        &self,
+        request: &impl Serialize,
+    ) -> Result<DynamicResponse, Error> {
+        self.passthrough("/agent-integrations/openrouter/systemone", request)
             .await
     }
 

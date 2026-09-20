@@ -216,7 +216,8 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 234 -> 237: the dashboard's usage reads —
     // `GET /opencompany/instances/usage`, `GET /payments/credits/ledger` and
     // `GET /payments/credits/ledger/export`.
-    assert_eq!(manifest["source"]["operationCount"], 237);
+    // 237 -> 239: OpenRouter System One plus its TypeSafe-compatible alias.
+    assert_eq!(manifest["source"]["operationCount"], 239);
     assert_eq!(manifest["source"]["supplementalOperationCount"], 14);
     // 37 -> 39: the two service-token operations on
     // `/opencompany/instances/{slug}/inference-key`. They are counted with the
@@ -238,7 +239,7 @@ fn generated_rust_routes_match_the_public_manifest() {
     // post's cover and body figures. Same token as the other blog writes.
     assert_eq!(manifest["source"]["excludedAdminOperationCount"], 44);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
-    assert_eq!(rust_routes.len(), 237);
+    assert_eq!(rust_routes.len(), 239);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
