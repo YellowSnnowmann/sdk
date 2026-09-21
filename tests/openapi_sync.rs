@@ -159,7 +159,12 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 203 -> 204: `POST /opencompany/instances/{slug}/update`, the
     // owner-triggered "update to latest" for a hosted company.
     // 204 -> 206: OpenRouter System One plus its TypeSafe-compatible alias.
-    assert_eq!(manifest["source"]["operationCount"], 206);
+    // 206 -> 208: `GET /opencompany/companies`, the company-template catalog,
+    // and `POST /opencompany/instances/{slug}/update`, the owner-triggered
+    // "update to latest" — both are served by the backend `main` this syncs
+    // against (sdk main had been generated from the deployed spec that predated
+    // them).
+    assert_eq!(manifest["source"]["operationCount"], 208);
     // 14 -> 13: `GET /orchestration/v1/steering` left with that family.
     assert_eq!(manifest["source"]["supplementalOperationCount"], 13);
     // 37 -> 39: the two service-token operations on
@@ -188,7 +193,9 @@ fn generated_rust_routes_match_the_public_manifest() {
     // user-facing half of that flow is `POST /auth/guild/link-token`.
     assert_eq!(manifest["source"]["excludedAdminOperationCount"], 46);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
-    assert_eq!(rust_routes.len(), 206);
+    // 206 -> 208: the two new public opencompany routes above
+    // (`GET /opencompany/companies` and `POST /opencompany/instances/{slug}/update`).
+    assert_eq!(rust_routes.len(), 208);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
