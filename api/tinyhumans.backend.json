@@ -8,9 +8,9 @@
     "url": "https://api.tinyhumans.ai/swagger.json",
     "title": "TinyHumans API",
     "version": "1.0.0",
-    "pathCount": 235,
-    "totalOperationCount": 260,
-    "operationCount": 206,
+    "pathCount": 237,
+    "totalOperationCount": 262,
+    "operationCount": 208,
     "supplementalOperationCount": 13,
     "excludedAdminOperationCount": 46,
     "excludedWebhookOperationCount": 12,
@@ -312,19 +312,21 @@
       "name": "openCompany",
       "basePath": "/opencompany",
       "auth": "bearer",
-      "operationCount": 9,
+      "operationCount": 11,
       "tags": [
         "OpenCompany"
       ],
       "routes": [
         "DELETE /opencompany/instances/{slug}",
         "DELETE /opencompany/instances/{slug}/custom-domain",
+        "GET /opencompany/companies",
         "GET /opencompany/instances",
         "GET /opencompany/instances/usage",
         "POST /opencompany/instances",
         "POST /opencompany/instances/{slug}/custom-domain/verify",
         "POST /opencompany/instances/{slug}/resume",
         "POST /opencompany/instances/{slug}/suspend",
+        "POST /opencompany/instances/{slug}/update",
         "PUT /opencompany/instances/{slug}/custom-domain"
       ]
     },
