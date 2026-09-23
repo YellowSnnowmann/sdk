@@ -502,9 +502,7 @@ async fn typed_image_request_forwards_every_field_including_input_references() {
     request.aspect_ratio = Some("16:9".into());
     request.resolution = Some("2K".into());
     request.seed = Some(42);
-    request.input_references = vec![ContentPartImage::image_url(
-        "https://example.com/ref.png",
-    )];
+    request.input_references = vec![ContentPartImage::image_url("https://example.com/ref.png")];
 
     let response: OpenRouterImageResponse = TinyHumansClient::new(server.uri())
         .agent_integrations()
@@ -556,9 +554,7 @@ async fn typed_video_request_forwards_frame_images_and_input_references() {
         FrameImage::first_frame("https://example.com/first.png"),
         FrameImage::last_frame("https://example.com/last.png"),
     ];
-    request.input_references = vec![ContentPartImage::image_url(
-        "https://example.com/ref.png",
-    )];
+    request.input_references = vec![ContentPartImage::image_url("https://example.com/ref.png")];
 
     let job: OpenRouterVideoJob = TinyHumansClient::new(server.uri())
         .agent_integrations()
@@ -632,7 +628,10 @@ async fn typed_video_models_carry_capability_descriptors() {
         .await
         .unwrap();
     let model = &response.data[0];
-    assert_eq!(model.supported_resolutions.as_deref(), Some(&["720p".to_string()][..]));
+    assert_eq!(
+        model.supported_resolutions.as_deref(),
+        Some(&["720p".to_string()][..])
+    );
     assert_eq!(model.supported_durations.as_deref(), Some(&[5, 8][..]));
     assert_eq!(model.generate_audio, Some(true));
     assert_eq!(model.supported_sizes, None);

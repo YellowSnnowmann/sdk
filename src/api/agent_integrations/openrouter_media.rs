@@ -304,7 +304,9 @@ impl AgentIntegrationsApi<'_> {
             enc(job_id)
         );
         let query = [("index", index.map(|i| i.to_string()))];
-        let (bytes, content_type) = self.bytes_query_with_type(Method::GET, &path, &query).await?;
+        let (bytes, content_type) = self
+            .bytes_query_with_type(Method::GET, &path, &query)
+            .await?;
         Ok(OpenRouterVideoContent {
             bytes,
             content_type,
