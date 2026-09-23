@@ -466,6 +466,232 @@ async fn video_content_omits_the_index_when_unset() {
     assert_eq!(bytes, vec![7]);
 }
 
+// --- Typed media DTOs (openrouter_media) ---
+
+#[tokio::test]
+async fn typed_image_request_forwards_every_field_including_input_references() {
+    let server = MockServer::start().await;
+    let expected_body = json!({
+        "model": "bytedance-seed/seedream-4.5",
+        "prompt": "a red panda astronaut",
+        "n": 2,
+        "aspect_ratio": "16:9",
+        "resolution": "2K",
+        "seed": 42,
+        "input_references": [
+            {"type": "image_url", "image_url": {"url": "https://example.com/ref.png"}}
+        ]
+    });
+    Mock::given(method("POST"))
+        .and(path("/agent-integrations/openrouter/images"))
+        .and(body_json(expected_body))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": true,
+            "data": {
+                "created": 1,
+                "data": [{"b64_json": "aGk=", "media_type": "image/png"}],
+                "usage": {"cost": 0.04, "prompt_tokens": 0, "completion_tokens": 10, "total_tokens": 10}
+            }
+        })))
+        .mount(&server)
+        .await;
+
+    let mut request =
+        OpenRouterImageRequest::new("bytedance-seed/seedream-4.5", "a red panda astronaut");
+    request.n = Some(2);
+    request.aspect_ratio = Some("16:9".into());
+    request.resolution = Some("2K".into());
+    request.seed = Some(42);
+    request.input_references = vec![ContentPartImage::image_url(
+        "https://example.com/ref.png",
+    )];
+
+    let response: OpenRouterImageResponse = TinyHumansClient::new(server.uri())
+        .agent_integrations()
+        .openrouter_images(&request)
+        .await
+        .unwrap();
+    assert_eq!(response.data[0].b64_json, "aGk=");
+    assert_eq!(response.data[0].media_type.as_deref(), Some("image/png"));
+    assert_eq!(response.usage.cost, Some(0.04));
+}
+
+#[tokio::test]
+async fn typed_video_request_forwards_frame_images_and_input_references() {
+    let server = MockServer::start().await;
+    let expected_body = json!({
+        "model": "google/veo-3.1",
+        "prompt": "a mountain",
+        "duration": 8,
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "generate_audio": true,
+        "seed": 7,
+        "frame_images": [
+            {"type": "image_url", "image_url": {"url": "https://example.com/first.png"}, "frame_type": "first_frame"},
+            {"type": "image_url", "image_url": {"url": "https://example.com/last.png"}, "frame_type": "last_frame"}
+        ],
+        "input_references": [
+            {"type": "image_url", "image_url": {"url": "https://example.com/ref.png"}}
+        ]
+    });
+    Mock::given(method("POST"))
+        .and(path("/agent-integrations/openrouter/videos"))
+        .and(body_json(expected_body))
+        .respond_with(ResponseTemplate::new(202).set_body_json(json!({
+            "success": true,
+            "data": {"id": "job-xyz", "status": "pending", "polling_url": "/api/v1/videos/job-xyz"}
+        })))
+        .mount(&server)
+        .await;
+
+    let mut request = OpenRouterVideoRequest::new("google/veo-3.1");
+    request.prompt = Some("a mountain".into());
+    request.duration = Some(8);
+    request.resolution = Some("720p".into());
+    request.aspect_ratio = Some("16:9".into());
+    request.generate_audio = Some(true);
+    request.seed = Some(7);
+    request.frame_images = vec![
+        FrameImage::first_frame("https://example.com/first.png"),
+        FrameImage::last_frame("https://example.com/last.png"),
+    ];
+    request.input_references = vec![ContentPartImage::image_url(
+        "https://example.com/ref.png",
+    )];
+
+    let job: OpenRouterVideoJob = TinyHumansClient::new(server.uri())
+        .agent_integrations()
+        .openrouter_videos(&request)
+        .await
+        .unwrap();
+    assert_eq!(job.id, "job-xyz");
+    assert_eq!(job.status, "pending");
+}
+
+#[tokio::test]
+async fn typed_image_models_carry_capability_descriptors() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/agent-integrations/openrouter/images/models"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": true,
+            "data": {
+                "object": "list",
+                "data": [{
+                    "id": "bytedance-seed/seedream-4.5",
+                    "display_name": "Seedream 4.5",
+                    "architecture": {"input_modalities": ["text", "image"], "output_modalities": ["image"]},
+                    "supported_parameters": {"resolution": {"type": "enum", "values": ["1K", "2K", "4K"]}}
+                }],
+                "total": 1, "limit": 100, "offset": 0
+            }
+        })))
+        .mount(&server)
+        .await;
+
+    let response: OpenRouterMediaModelsResponse = TinyHumansClient::new(server.uri())
+        .agent_integrations()
+        .openrouter_image_models(&[])
+        .await
+        .unwrap();
+    let arch = response.data[0].architecture.as_ref().unwrap();
+    assert_eq!(arch.output_modalities, vec!["image".to_string()]);
+    assert!(response.data[0].supported_parameters.is_some());
+}
+
+#[tokio::test]
+async fn typed_video_models_carry_capability_descriptors() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/agent-integrations/openrouter/videos/models"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": true,
+            "data": {
+                "object": "list",
+                "data": [{
+                    "id": "google/veo-3.1",
+                    "display_name": "Veo 3.1",
+                    "price_per_generation": 0.5,
+                    "supported_resolutions": ["720p"],
+                    "supported_aspect_ratios": ["16:9"],
+                    "supported_durations": [5, 8],
+                    "supported_frame_images": ["first_frame", "last_frame"],
+                    "generate_audio": true,
+                    "allowed_passthrough_parameters": ["google-vertex.output_config"]
+                }],
+                "total": 1, "limit": 100, "offset": 0
+            }
+        })))
+        .mount(&server)
+        .await;
+
+    let response: OpenRouterMediaModelsResponse = TinyHumansClient::new(server.uri())
+        .agent_integrations()
+        .openrouter_video_models(&[])
+        .await
+        .unwrap();
+    let model = &response.data[0];
+    assert_eq!(model.supported_resolutions.as_deref(), Some(&["720p".to_string()][..]));
+    assert_eq!(model.supported_durations.as_deref(), Some(&[5, 8][..]));
+    assert_eq!(model.generate_audio, Some(true));
+    assert_eq!(model.supported_sizes, None);
+}
+
+#[tokio::test]
+async fn polled_video_job_carries_unsigned_urls_and_usage() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/agent-integrations/openrouter/videos/job-abc"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": true,
+            "data": {
+                "id": "job-abc",
+                "status": "completed",
+                "unsigned_urls": ["https://storage.example.com/video.mp4"],
+                "usage": {"cost": 0.5}
+            }
+        })))
+        .mount(&server)
+        .await;
+
+    let job = TinyHumansClient::new(server.uri())
+        .agent_integrations()
+        .get_openrouter_video("job-abc")
+        .await
+        .unwrap();
+    assert_eq!(
+        job.unsigned_urls,
+        vec!["https://storage.example.com/video.mp4".to_string()]
+    );
+    assert_eq!(job.usage.unwrap().cost, Some(0.5));
+}
+
+#[tokio::test]
+async fn video_content_with_type_surfaces_the_upstream_content_type() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path(
+            "/agent-integrations/openrouter/videos/job-abc/content",
+        ))
+        .and(query_param("index", "1"))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .set_body_bytes([0_u8, 1, 2, 255])
+                .insert_header("content-type", "video/mp4"),
+        )
+        .mount(&server)
+        .await;
+
+    let content = TinyHumansClient::new(server.uri())
+        .agent_integrations()
+        .openrouter_video_content_with_type("job-abc", Some(1))
+        .await
+        .unwrap();
+    assert_eq!(content.bytes, vec![0, 1, 2, 255]);
+    assert_eq!(content.content_type.as_deref(), Some("video/mp4"));
+}
+
 #[tokio::test]
 async fn video_job_ids_are_path_encoded() {
     let server = MockServer::start().await;
