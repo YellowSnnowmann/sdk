@@ -384,6 +384,41 @@ impl HttpClient {
         Ok(bytes.to_vec())
     }
 
+    /// [`Self::send_bytes_query`], but also returns the upstream
+    /// `content-type` header, which the byte-only variant drops. Used by
+    /// routes (e.g. streamed media downloads) where the caller needs to know
+    /// how to interpret the bytes.
+    pub async fn send_bytes_query_with_content_type(
+        &self,
+        method: Method,
+        path: &str,
+        query: &[QueryParam],
+    ) -> Result<(Vec<u8>, Option<String>), Error> {
+        reject_unexposed_route(&method, path)?;
+        let response = self
+            .client
+            .request(method, self.url(path, query)?)
+            .headers(self.headers()?)
+            .send()
+            .await?;
+        let status = response.status();
+        let content_type = response
+            .headers()
+            .get(CONTENT_TYPE)
+            .and_then(|v| v.to_str().ok())
+            .map(str::to_owned);
+        let bytes = response.bytes().await?;
+        if !status.is_success() {
+            let body = serde_json::from_slice(&bytes)
+                .unwrap_or_else(|_| Value::String(String::from_utf8_lossy(&bytes).into_owned()));
+            return Err(Error::Status {
+                status: status.as_u16(),
+                body,
+            });
+        }
+        Ok((bytes.to_vec(), content_type))
+    }
+
     fn url(&self, path: &str, query: &[QueryParam]) -> Result<Url, Error> {
         let normalized = if path.starts_with('/') {
             path.to_owned()
