@@ -150,7 +150,16 @@ pub struct OpenRouterMediaModelsResponse {
     pub offset: u64,
 }
 
-/// An accepted video generation job. Poll `id` until `status` is terminal.
+/// Cost block on a completed video job (`usage.cost` on the polled response).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+pub struct OpenRouterVideoUsage {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost: Option<f64>,
+}
+
+/// An accepted video generation job, and its polled status. Poll `id` (via
+/// [`AgentIntegrationsApi::get_openrouter_video`]) until `status` is
+/// terminal: `unsigned_urls` and `usage` are only populated once it is.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub struct OpenRouterVideoJob {
     #[serde(default)]
@@ -163,6 +172,14 @@ pub struct OpenRouterVideoJob {
     pub polling_url: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
+    /// Upstream-hosted asset URLs, present once `status` is `"completed"`.
+    /// Prefer `openrouter_video_content`/`openrouter_video_content_with_type`
+    /// (ownership-checked, streamed through the backend) over fetching these
+    /// directly.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub unsigned_urls: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub usage: Option<OpenRouterVideoUsage>,
 }
 
 impl AgentIntegrationsApi<'_> {
