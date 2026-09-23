@@ -21,6 +21,7 @@ pub mod google_places;
 pub mod history_rewards;
 pub mod media_generation;
 pub mod openrouter;
+pub mod openrouter_media;
 pub mod parallel;
 pub mod pricing;
 pub mod recall_calendar;
