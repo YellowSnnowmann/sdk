@@ -21,6 +21,7 @@ fn every_provider_has_its_own_module() {
     assert_named::<split::history_rewards::HistoryRewardsStatus>(std::marker::PhantomData);
     assert_named::<split::media_generation::ImageGenerationRequest>(std::marker::PhantomData);
     assert_named::<split::openrouter::OpenRouterModel>(std::marker::PhantomData);
+    assert_named::<split::openrouter_media::OpenRouterImageRequest>(std::marker::PhantomData);
     assert_named::<split::parallel::ParallelChatRequest>(std::marker::PhantomData);
     assert_named::<split::pricing::IntegrationPricingResponse>(std::marker::PhantomData);
     assert_named::<split::recall_calendar::RecallCalendarStatus>(std::marker::PhantomData);
