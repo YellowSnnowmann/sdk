@@ -589,7 +589,12 @@ mod exclusion_tests {
         // `DELETE /internal/discord/link/{userId}`, both gated by a shared
         // service token rather than a user bearer, so they are unexposed like
         // the orchestrator's inference-key callbacks.
-        assert_eq!(UNEXPOSED_ROUTES.len(), 58);
+        //
+        // 58 -> 59: `PUT /opencompany/instances/{slug}/orchestrator`, the
+        // orchestrator's own service-token-authenticated callback (same shape
+        // as the two `inference-key` operations and `.../usage` above), added
+        // alongside `POST /opencompany/instances/{slug}/usage`.
+        assert_eq!(UNEXPOSED_ROUTES.len(), 59);
         for (method, template) in UNEXPOSED_ROUTES {
             let concrete_path = template
                 .split('/')
