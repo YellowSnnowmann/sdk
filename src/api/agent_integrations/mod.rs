@@ -38,6 +38,7 @@ pub use google_places::*;
 pub use history_rewards::*;
 pub use media_generation::*;
 pub use openrouter::*;
+pub use openrouter_media::*;
 pub use parallel::*;
 pub use pricing::*;
 pub use recall_calendar::*;
