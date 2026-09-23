@@ -9,7 +9,9 @@
 
 use serde_json::json;
 use tinyhumans_sdk::api::agent_integrations::{
+    ContentPartImage, FrameImage, OpenRouterImageRequest, OpenRouterImageResponse,
     OpenRouterMediaModelsResponse, OpenRouterModelsResponse, OpenRouterVideoJob,
+    OpenRouterVideoRequest,
 };
 use tinyhumans_sdk::TinyHumansClient;
 use wiremock::matchers::{body_json, method, path, query_param};
