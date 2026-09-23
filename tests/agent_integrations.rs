@@ -693,6 +693,7 @@ async fn google_places_search_posts_body() {
 // --- Media Generation ---
 
 #[tokio::test]
+#[allow(deprecated)]
 async fn media_generation_images_posts_body() {
     let server = MockServer::start().await;
     Mock::given(method("POST"))
@@ -716,6 +717,7 @@ async fn media_generation_images_posts_body() {
 }
 
 #[tokio::test]
+#[allow(deprecated)]
 async fn list_media_generation_models_gets_query() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
@@ -739,6 +741,7 @@ async fn list_media_generation_models_gets_query() {
 }
 
 #[tokio::test]
+#[allow(deprecated)]
 async fn get_media_generation_request_uses_path_param() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
@@ -761,6 +764,7 @@ async fn get_media_generation_request_uses_path_param() {
 }
 
 #[tokio::test]
+#[allow(deprecated)]
 async fn media_generation_videos_posts_body() {
     let server = MockServer::start().await;
     Mock::given(method("POST"))
