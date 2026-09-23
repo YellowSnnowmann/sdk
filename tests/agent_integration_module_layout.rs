@@ -59,4 +59,8 @@ fn the_pre_split_types_path_still_resolves() {
         &flat::IntegrationPricingResponse::default(),
         &split::IntegrationPricingResponse::default(),
     );
+    assert_same_type(
+        &flat::OpenRouterImageRequest::default(),
+        &split::openrouter_media::OpenRouterImageRequest::default(),
+    );
 }
