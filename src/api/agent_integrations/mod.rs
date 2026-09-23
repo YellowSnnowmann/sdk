@@ -111,4 +111,16 @@ impl<'a> AgentIntegrationsApi<'a> {
     ) -> Result<Vec<u8>, Error> {
         self.http.send_bytes_query(method, path, query).await
     }
+
+    /// [`Self::bytes_query`], but also returns the upstream `content-type`.
+    async fn bytes_query_with_type(
+        &self,
+        method: Method,
+        path: &str,
+        query: &[QueryParam],
+    ) -> Result<(Vec<u8>, Option<String>), Error> {
+        self.http
+            .send_bytes_query_with_content_type(method, path, query)
+            .await
+    }
 }
