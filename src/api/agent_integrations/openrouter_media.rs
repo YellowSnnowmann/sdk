@@ -274,8 +274,9 @@ impl AgentIntegrationsApi<'_> {
         &self,
         request: &OpenRouterVideoRequest,
     ) -> Result<super::openrouter::OpenRouterVideoJob, Error> {
-        self.post("/agent-integrations/openrouter/videos", request)
-            .await
+        const PATH: &str = "/agent-integrations/openrouter/videos";
+        let body = serde_json::to_value(request)?;
+        self.send(Method::POST, PATH, &[], Some(&body), true).await
     }
 
     /// List video-generation models, typed. Equivalent to
