@@ -195,9 +195,7 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 46 -> 47: `PUT /opencompany/instances/{slug}/orchestrator`, the
     // orchestrator's own service-token callback (same shape as the two
     // `inference-key` operations and `.../usage` above).
-    // Note: The deployed spec currently has fewer admin operations (40),
-    // as the orchestrator route has not yet been deployed.
-    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 40);
+    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 47);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
     // 206 -> 208: the two new public opencompany routes above
     // (`GET /opencompany/companies` and `POST /opencompany/instances/{slug}/update`).
