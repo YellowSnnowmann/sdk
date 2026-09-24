@@ -8,11 +8,11 @@
     "url": "https://api.tinyhumans.ai/swagger.json",
     "title": "TinyHumans API",
     "version": "1.0.0",
-    "pathCount": 182,
-    "totalOperationCount": 196,
+    "pathCount": 238,
+    "totalOperationCount": 263,
     "operationCount": 208,
     "supplementalOperationCount": 13,
-    "excludedAdminOperationCount": 40,
+    "excludedAdminOperationCount": 47,
     "excludedWebhookOperationCount": 12,
     "servers": [
       "https://api.tinyhumans.ai/",
@@ -424,7 +424,6 @@
       "auth": "bearer",
       "operationCount": 17,
       "tags": [
-        "OpenHuman parity",
         "Teams"
       ],
       "routes": [
@@ -484,7 +483,7 @@
       "auth": "bearer",
       "operationCount": 6,
       "tags": [
-        "OpenHuman parity"
+        "Webhooks"
       ],
       "routes": [
         "DELETE /webhooks/core/{id}",
