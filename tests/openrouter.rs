@@ -566,6 +566,44 @@ async fn typed_video_request_forwards_frame_images_and_input_references() {
 }
 
 #[tokio::test]
+async fn typed_media_requests_reject_streaming_before_the_wire() {
+    // `openrouter_images`/`openrouter_videos` buffer the whole response body
+    // and deserialize it as JSON (`OpenRouterImageResponse`/`OpenRouterVideoJob`),
+    // so a `stream: true` request would come back as an SSE event stream and
+    // fail to decode instead of erroring clearly. No mock is registered for
+    // either route, so a transport/decode error (rather than
+    // `StreamingNotSupported`) would mean the guard let the request through.
+    let server = MockServer::start().await;
+    let client = TinyHumansClient::new(server.uri());
+
+    let mut image_request = OpenRouterImageRequest::new("bytedance-seed/seedream-4.5", "a cat");
+    image_request.stream = Some(true);
+    let image_err = client
+        .agent_integrations()
+        .openrouter_images(&image_request)
+        .await
+        .unwrap_err();
+    assert!(
+        matches!(image_err, tinyhumans_sdk::Error::StreamingNotSupported(ref path) if path == "/agent-integrations/openrouter/images"),
+        "unexpected error: {image_err:?}"
+    );
+
+    let mut video_request = OpenRouterVideoRequest::new("google/veo-3.1");
+    video_request
+        .extra
+        .insert("stream".to_owned(), serde_json::Value::Bool(true));
+    let video_err = client
+        .agent_integrations()
+        .openrouter_videos(&video_request)
+        .await
+        .unwrap_err();
+    assert!(
+        matches!(video_err, tinyhumans_sdk::Error::StreamingNotSupported(ref path) if path == "/agent-integrations/openrouter/videos"),
+        "unexpected error: {video_err:?}"
+    );
+}
+
+#[tokio::test]
 async fn typed_image_models_carry_capability_descriptors() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
