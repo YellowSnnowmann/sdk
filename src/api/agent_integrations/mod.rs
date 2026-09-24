@@ -21,6 +21,7 @@ pub mod google_places;
 pub mod history_rewards;
 pub mod media_generation;
 pub mod openrouter;
+pub mod openrouter_media;
 pub mod parallel;
 pub mod pricing;
 pub mod recall_calendar;
@@ -37,6 +38,7 @@ pub use google_places::*;
 pub use history_rewards::*;
 pub use media_generation::*;
 pub use openrouter::*;
+pub use openrouter_media::*;
 pub use parallel::*;
 pub use pricing::*;
 pub use recall_calendar::*;
@@ -108,5 +110,17 @@ impl<'a> AgentIntegrationsApi<'a> {
         query: &[QueryParam],
     ) -> Result<Vec<u8>, Error> {
         self.http.send_bytes_query(method, path, query).await
+    }
+
+    /// [`Self::bytes_query`], but also returns the upstream `content-type`.
+    async fn bytes_query_with_type(
+        &self,
+        method: Method,
+        path: &str,
+        query: &[QueryParam],
+    ) -> Result<(Vec<u8>, Option<String>), Error> {
+        self.http
+            .send_bytes_query_with_content_type(method, path, query)
+            .await
     }
 }

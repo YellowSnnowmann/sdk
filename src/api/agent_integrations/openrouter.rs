@@ -74,12 +74,28 @@ pub struct OpenRouterModelsResponse {
     pub offset: u64,
 }
 
+/// Input/output modality lists for an image model (`architecture` on the
+/// upstream image catalog).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+pub struct OpenRouterImageArchitecture {
+    #[serde(default)]
+    pub input_modalities: Vec<String>,
+    #[serde(default)]
+    pub output_modalities: Vec<String>,
+}
+
 /// One image or video model.
 ///
 /// Media models are not token-priced, so this carries no per-1M block. Video
 /// models publish a flat `price_per_generation`; image models publish none at
 /// all, because an image is billed at the exact cost the generation response
 /// reports.
+///
+/// The capability fields below are passed through from the cached upstream
+/// catalog entry when the backend's listing carried them, so a caller can
+/// validate a request pre-flight against this model's actual capabilities
+/// instead of guessing. All are `None`/empty when upstream did not publish
+/// them for this model.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub struct OpenRouterMediaModel {
     pub id: String,
@@ -87,6 +103,37 @@ pub struct OpenRouterMediaModel {
     pub display_name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub price_per_generation: Option<f64>,
+    /// Image models only — a typed descriptor map, e.g. `resolution`/`seed`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub supported_parameters: Option<serde_json::Map<String, serde_json::Value>>,
+    /// Image models only.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub architecture: Option<OpenRouterImageArchitecture>,
+    /// Video models only.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub supported_resolutions: Option<Vec<String>>,
+    /// Video models only.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub supported_aspect_ratios: Option<Vec<String>>,
+    /// Video models only.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub supported_durations: Option<Vec<u32>>,
+    /// Video models only.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub supported_sizes: Option<Vec<String>>,
+    /// Video models only.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub supported_frame_images: Option<Vec<String>>,
+    /// Video models only.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub generate_audio: Option<bool>,
+    /// Video models only — whether the model supports deterministic
+    /// generation via a `seed` parameter.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seed: Option<bool>,
+    /// Video models only.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub allowed_passthrough_parameters: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
@@ -103,7 +150,16 @@ pub struct OpenRouterMediaModelsResponse {
     pub offset: u64,
 }
 
-/// An accepted video generation job. Poll `id` until `status` is terminal.
+/// Cost block on a completed video job (`usage.cost` on the polled response).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+pub struct OpenRouterVideoUsage {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cost: Option<f64>,
+}
+
+/// An accepted video generation job, and its polled status. Poll `id` (via
+/// [`AgentIntegrationsApi::get_openrouter_video`]) until `status` is
+/// terminal: `unsigned_urls` and `usage` are only populated once it is.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub struct OpenRouterVideoJob {
     #[serde(default)]
@@ -116,6 +172,14 @@ pub struct OpenRouterVideoJob {
     pub polling_url: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
+    /// Upstream-hosted asset URLs, present once `status` is `"completed"`.
+    /// Prefer `openrouter_video_content`/`openrouter_video_content_with_type`
+    /// (ownership-checked, streamed through the backend) over fetching these
+    /// directly.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub unsigned_urls: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub usage: Option<OpenRouterVideoUsage>,
 }
 
 impl AgentIntegrationsApi<'_> {

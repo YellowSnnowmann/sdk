@@ -2,7 +2,7 @@
 
 The SDK surface is grounded in the deployed Swagger/OpenAPI contract at
 <https://api.tinyhumans.ai/swagger.json>. The spec reports TinyHumans API
-`1.0.0` with 161 paths and 182 operations. The Rust SDK exposes one typed
+`1.0.0` with 182 paths and 196 operations. The Rust SDK exposes one typed
 method per public operation — **197 operations across the 21 namespaces
 below**.
 The remaining 32 administrative and 12 webhook-receiver operations are
@@ -67,3 +67,39 @@ Most JSON responses use the hosted-backend envelope:
 
 SDK request helpers unwrap this envelope by default. The raw helper can return the
 full response body when callers need status metadata or non-standard payloads.
+
+## OpenRouter media generation
+
+`agent_integrations::openrouter` exposes the direct OpenRouter proxy under
+`/agent-integrations/openrouter/*`, including image (`POST /images`) and video
+(`POST /videos`, `GET /videos/{jobId}`, `GET /videos/{jobId}/content`)
+generation with untyped `impl Serialize` request bodies (OpenRouter's own API
+is the contract for this surface).
+
+`agent_integrations::openrouter_media` adds a fully typed alternative for the
+media routes only — `OpenRouterImageRequest`/`OpenRouterImageResponse`,
+`OpenRouterVideoRequest`, `ContentPartImage`, `FrameImage` — with an `extra`
+flattened map on each request struct so an upstream field this module does not
+yet model is still forwarded. Both modules call the same routes; pick whichever
+fits the caller (`openrouter_images`/`openrouter_videos`/
+`openrouter_image_models`/`openrouter_video_models` for typed,
+`openrouter_create_image`/`openrouter_create_video`/
+`list_openrouter_image_models`/`list_openrouter_video_models` for
+passthrough). `get_openrouter_video`, `openrouter_video_content`, and the typed
+module's `openrouter_video_content_with_type` (which also surfaces the
+upstream `content-type`, since the plain byte helper drops response headers)
+are shared by both.
+
+`OpenRouterMediaModel` (returned by both the typed and untyped model listings)
+carries OpenRouter's capability descriptors verbatim when the backend's
+catalog published them: `supported_parameters`/`architecture` for image
+models, and `supported_resolutions`/`supported_aspect_ratios`/
+`supported_durations`/`supported_sizes`/`supported_frame_images`/
+`generate_audio`/`seed`/`allowed_passthrough_parameters` for video models —
+so a caller can validate a request against a model's real capabilities before
+submitting it.
+
+The older GMI-backed `agent_integrations::media_generation` module
+(`/agent-integrations/media-generation/*`) is deprecated in favor of the
+OpenRouter surface above; its methods are `#[deprecated]` but remain
+functional.

@@ -75,6 +75,9 @@ pub struct MediaResponse {
     pub error: Option<String>,
 }
 
+/// Legacy flat model shape. No current backend deployment sends this — kept
+/// only so an old snapshot from before the `curated`/`upstream` split (or a
+/// non-conforming custom entry) still deserializes to something.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaModel {
@@ -87,14 +90,43 @@ pub struct MediaModel {
     pub capabilities: Value,
 }
 
+/// One entry in the curated GMI media catalog
+/// (`MediaModelInfo` on the backend).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct CuratedMediaModel {
+    pub id: String,
+    #[serde(default)]
+    pub modality: String,
+    #[serde(default)]
+    pub kinds: Vec<String>,
+    #[serde(default)]
+    pub base_cost_usd: f64,
+    #[serde(default)]
+    pub description: String,
+}
+
+/// `GET /agent-integrations/media-generation/models` response
+/// (`MediaListModelsControllerResponse` on the backend): the curated catalog,
+/// plus GMI's live model ids when `includeUpstream=true` was requested and
+/// available.
+///
+/// `models` is kept for backward compatibility with the pre-`curated`/
+/// `upstream` flat shape (see [`MediaModel`]) — the current backend never
+/// populates it, so it is always empty on a live response.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub struct MediaModelsResponse {
+    #[serde(default)]
+    pub curated: Vec<CuratedMediaModel>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub upstream: Option<Vec<String>>,
     #[serde(default)]
     pub models: Vec<MediaModel>,
 }
 
 impl AgentIntegrationsApi<'_> {
     /// Generate or edit an image via GMI (Seedream / SeedEdit).
+    #[deprecated(note = "use AgentIntegrationsApi::openrouter_images")]
     pub async fn media_generation_images(
         &self,
         request: &impl Serialize,
@@ -104,6 +136,9 @@ impl AgentIntegrationsApi<'_> {
     }
 
     /// List curated media-generation models.
+    #[deprecated(
+        note = "use AgentIntegrationsApi::openrouter_image_models / openrouter_video_models"
+    )]
     pub async fn list_media_generation_models(
         &self,
         query: &[QueryParam],
@@ -120,6 +155,9 @@ impl AgentIntegrationsApi<'_> {
     }
 
     /// Poll a media-generation request.
+    #[deprecated(
+        note = "use AgentIntegrationsApi::get_openrouter_video / openrouter_video_content"
+    )]
     pub async fn get_media_generation_request(
         &self,
         request_id: &str,
@@ -132,6 +170,7 @@ impl AgentIntegrationsApi<'_> {
     }
 
     /// Generate a video via GMI (Seedance / Veo).
+    #[deprecated(note = "use AgentIntegrationsApi::openrouter_videos")]
     pub async fn media_generation_videos(
         &self,
         request: &impl Serialize,

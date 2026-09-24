@@ -59,6 +59,7 @@ const RETAINED_UNEXPOSED_ROUTES = [
   // list exists to prevent. Declared here so both paths agree.
   ["POST", "/opencompany/instances/{slug}/inference-key"],
   ["DELETE", "/opencompany/instances/{slug}/inference-key"],
+  ["PUT", "/opencompany/instances/{slug}/orchestrator"],
   ["POST", "/opencompany/instances/{slug}/usage"],
   // Guild (teeny Discord service) callbacks, gated by GUILD_SERVICE_TOKEN.
   ["POST", "/internal/discord/link"],

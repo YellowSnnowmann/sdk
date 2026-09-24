@@ -12,6 +12,7 @@ pub use super::agent_integrations::financial_apis::*;
 pub use super::agent_integrations::google_places::*;
 pub use super::agent_integrations::history_rewards::*;
 pub use super::agent_integrations::media_generation::*;
+pub use super::agent_integrations::openrouter_media::*;
 pub use super::agent_integrations::parallel::*;
 pub use super::agent_integrations::pricing::*;
 pub use super::agent_integrations::recall_calendar::*;

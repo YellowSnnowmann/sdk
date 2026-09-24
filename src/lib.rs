@@ -364,6 +364,21 @@ impl HttpClient {
         path: &str,
         query: &[QueryParam],
     ) -> Result<Vec<u8>, Error> {
+        self.send_bytes_query_with_content_type(method, path, query)
+            .await
+            .map(|(bytes, _)| bytes)
+    }
+
+    /// [`Self::send_bytes_query`], but also returns the upstream
+    /// `content-type` header, which the byte-only variant drops. Used by
+    /// routes (e.g. streamed media downloads) where the caller needs to know
+    /// how to interpret the bytes.
+    pub async fn send_bytes_query_with_content_type(
+        &self,
+        method: Method,
+        path: &str,
+        query: &[QueryParam],
+    ) -> Result<(Vec<u8>, Option<String>), Error> {
         reject_unexposed_route(&method, path)?;
         let response = self
             .client
@@ -372,6 +387,11 @@ impl HttpClient {
             .send()
             .await?;
         let status = response.status();
+        let content_type = response
+            .headers()
+            .get(CONTENT_TYPE)
+            .and_then(|v| v.to_str().ok())
+            .map(str::to_owned);
         let bytes = response.bytes().await?;
         if !status.is_success() {
             let body = serde_json::from_slice(&bytes)
@@ -381,7 +401,7 @@ impl HttpClient {
                 body,
             });
         }
-        Ok(bytes.to_vec())
+        Ok((bytes.to_vec(), content_type))
     }
 
     fn url(&self, path: &str, query: &[QueryParam]) -> Result<Url, Error> {
@@ -554,7 +574,16 @@ mod exclusion_tests {
         // `DELETE /internal/discord/link/{userId}`, both gated by a shared
         // service token rather than a user bearer, so they are unexposed like
         // the orchestrator's inference-key callbacks.
-        assert_eq!(UNEXPOSED_ROUTES.len(), 58);
+        //
+        // 58 -> 59: `PUT /opencompany/instances/{slug}/orchestrator`, the
+        // orchestrator's own service-token-authenticated callback (same shape
+        // as the two `inference-key` operations and `.../usage` above), added
+        // alongside `POST /opencompany/instances/{slug}/usage`.
+        // Note: This assertion reflects the count when synced against the
+        // deployed OpenAPI spec. When the backend branch adds routes that
+        // aren't yet deployed, the local count may differ; the RETAINED_UNEXPOSED_ROUTES
+        // in sync-openapi.mjs preserves admin/webhook operations regardless.
+        assert_eq!(UNEXPOSED_ROUTES.len(), 59);
         for (method, template) in UNEXPOSED_ROUTES {
             let concrete_path = template
                 .split('/')
