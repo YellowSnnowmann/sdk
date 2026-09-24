@@ -23,7 +23,7 @@ use super::AgentIntegrationsApi;
 use crate::{enc, Error, QueryParam};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
-use serde_json::{Map, Value, json};
+use serde_json::{Map, Value};
 
 /// `image_url` reference used by both `input_references` and `frame_images`.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
