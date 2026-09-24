@@ -276,6 +276,9 @@ impl AgentIntegrationsApi<'_> {
     ) -> Result<super::openrouter::OpenRouterVideoJob, Error> {
         const PATH: &str = "/agent-integrations/openrouter/videos";
         let body = serde_json::to_value(request)?;
+        if matches!(body.get("stream"), Some(Value::Bool(true))) {
+            return Err(Error::StreamingNotSupported(PATH.to_owned()));
+        }
         self.send(Method::POST, PATH, &[], Some(&body), true).await
     }
 
