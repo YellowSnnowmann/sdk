@@ -364,24 +364,9 @@ impl HttpClient {
         path: &str,
         query: &[QueryParam],
     ) -> Result<Vec<u8>, Error> {
-        reject_unexposed_route(&method, path)?;
-        let response = self
-            .client
-            .request(method, self.url(path, query)?)
-            .headers(self.headers()?)
-            .send()
-            .await?;
-        let status = response.status();
-        let bytes = response.bytes().await?;
-        if !status.is_success() {
-            let body = serde_json::from_slice(&bytes)
-                .unwrap_or_else(|_| Value::String(String::from_utf8_lossy(&bytes).into_owned()));
-            return Err(Error::Status {
-                status: status.as_u16(),
-                body,
-            });
-        }
-        Ok(bytes.to_vec())
+        self.send_bytes_query_with_content_type(method, path, query)
+            .await
+            .map(|(bytes, _)| bytes)
     }
 
     /// [`Self::send_bytes_query`], but also returns the upstream
