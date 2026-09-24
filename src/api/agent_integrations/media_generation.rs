@@ -93,6 +93,7 @@ pub struct MediaModel {
 /// One entry in the curated GMI media catalog
 /// (`MediaModelInfo` on the backend).
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct CuratedMediaModel {
     pub id: String,
     #[serde(default)]
