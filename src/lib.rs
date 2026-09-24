@@ -583,7 +583,7 @@ mod exclusion_tests {
         // deployed OpenAPI spec. When the backend branch adds routes that
         // aren't yet deployed, the local count may differ; the RETAINED_UNEXPOSED_ROUTES
         // in sync-openapi.mjs preserves admin/webhook operations regardless.
-        assert_eq!(UNEXPOSED_ROUTES.len(), 52);
+        assert_eq!(UNEXPOSED_ROUTES.len(), 59);
         for (method, template) in UNEXPOSED_ROUTES {
             let concrete_path = template
                 .split('/')
