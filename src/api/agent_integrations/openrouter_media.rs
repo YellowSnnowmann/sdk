@@ -242,8 +242,12 @@ impl AgentIntegrationsApi<'_> {
         &self,
         request: &OpenRouterImageRequest,
     ) -> Result<OpenRouterImageResponse, Error> {
-        self.post("/agent-integrations/openrouter/images", request)
-            .await
+        const PATH: &str = "/agent-integrations/openrouter/images";
+        let body = serde_json::to_value(request)?;
+        if matches!(body.get("stream"), Some(Value::Bool(true))) {
+            return Err(Error::StreamingNotSupported(PATH.to_owned()));
+        }
+        self.send(Method::POST, PATH, &[], Some(&body), true).await
     }
 
     /// List image-generation models, typed. Equivalent to
