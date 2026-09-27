@@ -12,7 +12,6 @@ use tinyhumans_sdk::api::agent_integrations as split;
 fn every_provider_has_its_own_module() {
     fn assert_named<T>(_: std::marker::PhantomData<T>) {}
 
-    assert_named::<split::apify::ApifyRunRequest>(std::marker::PhantomData);
     assert_named::<split::composio::ComposioAuthorizeRequest>(std::marker::PhantomData);
     assert_named::<split::crypto::CryptoSwapRequest>(std::marker::PhantomData);
     assert_named::<split::file_storage::FileMetadata>(std::marker::PhantomData);
@@ -49,10 +48,6 @@ fn the_pre_split_types_path_still_resolves() {
             twiml: None,
             url: None,
         },
-    );
-    assert_same_type(
-        &flat::ApifyRunRequest::default(),
-        &split::apify::ApifyRunRequest::default(),
     );
     // The module-root glob re-export, which is what `AgentIntegrationsApi`
     // method signatures name.

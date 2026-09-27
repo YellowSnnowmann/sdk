@@ -31,7 +31,7 @@ namespace.
 | `health` | `/` | none | `check()` liveness |
 | `auth` | `/auth` | bearer | email login, OAuth, `me()`, integration tokens |
 | `inference` | `/openai` | bearer | `GET /v1/models`, chat completions, responses, transcription |
-| `agentIntegrations` | `/agent-integrations` | bearer | Composio, Parallel, media generation, maps, Apify, Twilio, crypto, OpenRouter |
+| `agentIntegrations` | `/agent-integrations` | bearer | Composio, Parallel, media generation, maps, Twilio, crypto, OpenRouter |
 | `apiKeys` | `/api-keys` | bearer | create, list, and revoke user API keys |
 | `budgets` | `/budgets` | bearer | team budgets and seat allocations |
 | `openCompany` | `/opencompany` | bearer | company instances, lifecycle, and custom domains |

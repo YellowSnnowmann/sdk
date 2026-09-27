@@ -170,11 +170,12 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 212 -> 214: Exa search plus the authenticated Langfuse telemetry route.
     // 214 -> 229: the remaining priced Exa Contents, Answer, Find Similar,
     // Agent run, and Batch operations.
-    // 229 -> 235: the six `/memory/*` routes (hosted agent memory).
+    // 229 -> 226: the three Apify routes are gone with that integration.
+    // 226 -> 232: the six `/memory/*` routes (hosted agent memory).
     // The Langfuse telemetry route stays in the public surface: it takes a
     // normal user bearer token (authenticateJWT), not a service token, so it
     // is ordinary user-facing API rather than a service-to-service callback.
-    assert_eq!(manifest["source"]["operationCount"], 235);
+    assert_eq!(manifest["source"]["operationCount"], 232);
     // 14 -> 13: `GET /orchestration/v1/steering` left with that family.
     assert_eq!(manifest["source"]["supplementalOperationCount"], 13);
     // 37 -> 39: the two service-token operations on
@@ -218,8 +219,9 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 212 -> 214: Exa search plus the authenticated Langfuse telemetry route.
     // 214 -> 229: the remaining priced Exa Contents, Answer, Find Similar,
     // Agent run, and Batch operations.
-    // 229 -> 235: the six memory routes (the telemetry route stays public).
-    assert_eq!(rust_routes.len(), 235);
+    // 229 -> 226: the three Apify routes are gone with that integration.
+    // 226 -> 232: the six memory routes (the telemetry route stays public).
+    assert_eq!(rust_routes.len(), 232);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
