@@ -112,6 +112,7 @@ async fn list_scopes_without_prefix() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
         .and(path("/memory/scopes"))
+        .and(query_param_is_missing("prefix"))
         .respond_with(ok(json!({"scopes": []})))
         .mount(&server)
         .await;
