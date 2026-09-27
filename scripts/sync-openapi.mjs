@@ -65,8 +65,13 @@ const RETAINED_UNEXPOSED_ROUTES = [
   // are undocumented in the backend so that this public repository never
   // names them; the SDK blocks the whole `/internal/` prefix structurally
   // instead (`is_structurally_unexposed` in src/lib.rs).
-  // Telemetry ingestion endpoint for OTEL / Langfuse.
-  ["POST", "/telemetry/langfuse/otel/v1/traces"],
+  //
+  // NOTE: `/telemetry/langfuse/otel/v1/traces` deliberately does NOT belong
+  // here. It takes a normal user bearer token (authenticateJWT) — see
+  // backend `src/routes/langfuseTelemetry.ts` — so it is ordinary
+  // user-facing API, not an admin operation or webhook receiver. A prior
+  // pass wrongly added it alongside the /internal/memory callbacks above;
+  // flagged by chatgpt-codex-connector on PR #39.
   ["POST", "/admin/announcements"],
   ["DELETE", "/admin/announcements/{announcementId}"],
   ["PATCH", "/admin/announcements/{announcementId}"],
