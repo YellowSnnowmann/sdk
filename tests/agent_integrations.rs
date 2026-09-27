@@ -116,76 +116,6 @@ async fn tinyfish_routes_use_typed_requests_and_responses() {
     assert_eq!(run.run_id.as_deref(), Some("run_1"));
 }
 
-// --- Apify ---
-
-#[tokio::test]
-async fn run_apify_actor_posts_body() {
-    let server = MockServer::start().await;
-    Mock::given(method("POST"))
-        .and(path("/agent-integrations/apify/run"))
-        .and(body_json(json!({"actorId": "abc", "input": {}})))
-        .respond_with(
-            ResponseTemplate::new(200)
-                .set_body_json(json!({"success": true, "data": {"runId": "r1"}})),
-        )
-        .mount(&server)
-        .await;
-
-    let client = TinyHumansClient::new(server.uri());
-    let result = client
-        .agent_integrations()
-        .run_apify_actor(&json!({"actorId": "abc", "input": {}}))
-        .await
-        .unwrap();
-
-    let _ = result;
-}
-
-#[tokio::test]
-async fn get_apify_run_uses_path_param() {
-    let server = MockServer::start().await;
-    Mock::given(method("GET"))
-        .and(path("/agent-integrations/apify/runs/run_42"))
-        .respond_with(
-            ResponseTemplate::new(200)
-                .set_body_json(json!({"success": true, "data": {"status": "SUCCEEDED"}})),
-        )
-        .mount(&server)
-        .await;
-
-    let client = TinyHumansClient::new(server.uri());
-    let result = client
-        .agent_integrations()
-        .get_apify_run("run_42")
-        .await
-        .unwrap();
-
-    let _ = result;
-}
-
-#[tokio::test]
-async fn get_apify_run_results_sends_query() {
-    let server = MockServer::start().await;
-    Mock::given(method("GET"))
-        .and(path("/agent-integrations/apify/runs/run_42/results"))
-        .and(query_param("limit", "10"))
-        .respond_with(
-            ResponseTemplate::new(200)
-                .set_body_json(json!({"success": true, "data": {"items": []}})),
-        )
-        .mount(&server)
-        .await;
-
-    let client = TinyHumansClient::new(server.uri());
-    let result = client
-        .agent_integrations()
-        .get_apify_run_results("run_42", &[("limit", Some("10".to_string()))])
-        .await
-        .unwrap();
-
-    let _ = result;
-}
-
 // --- Composio ---
 
 #[tokio::test]
@@ -1025,7 +955,7 @@ async fn get_pricing_returns_data() {
         .and(path("/agent-integrations/pricing"))
         .respond_with(
             ResponseTemplate::new(200)
-                .set_body_json(json!({"success": true, "data": {"apify": 1}})),
+                .set_body_json(json!({"success": true, "data": {"tenor": 1}})),
         )
         .mount(&server)
         .await;

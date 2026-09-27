@@ -30,7 +30,7 @@ agent-integration platform. The SDK should expose these API families cleanly:
   view over the caller's personal team — see the backend's `docs/TEAMS_REMOVAL.md`)
   and `/payments/*`.
 - Agent integrations under `/agent-integrations/*` for Composio, Parallel,
-  media generation, financial APIs, maps, Apify, Tenor, Twilio, crypto, and
+  media generation, financial APIs, maps, Tenor, Twilio, crypto, and
   the direct OpenRouter proxy.
 - Telegram/Discord channel integration routes under `/channels/*`.
 - Feedback, invites, referrals, rewards, announcements, mascots, and
