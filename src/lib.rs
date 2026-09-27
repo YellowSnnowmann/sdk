@@ -352,6 +352,42 @@ impl HttpClient {
         unwrap_envelope(value)
     }
 
+    /// Send `body` as-is under `content_type` (a file upload that is not
+    /// multipart) and unwrap the JSON envelope of the answer.
+    pub async fn send_raw_body(
+        &self,
+        method: Method,
+        path: &str,
+        body: Vec<u8>,
+        content_type: &str,
+    ) -> Result<Value, Error> {
+        reject_unexposed_route(&method, path)?;
+        let url = self.url(path, &[])?;
+        let mut headers = self.headers()?;
+        headers.insert(CONTENT_TYPE, HeaderValue::from_str(content_type)?);
+        let response = self
+            .client
+            .request(method, url)
+            .headers(headers)
+            .body(body)
+            .send()
+            .await?;
+        let status = response.status();
+        let text = response.text().await?;
+        let value = if text.is_empty() {
+            Value::Null
+        } else {
+            serde_json::from_str(&text).unwrap_or(Value::String(text))
+        };
+        if !status.is_success() {
+            return Err(Error::Status {
+                status: status.as_u16(),
+                body: value,
+            });
+        }
+        unwrap_envelope(value)
+    }
+
     /// Send a request whose successful response is binary rather than JSON.
     pub async fn send_bytes(&self, method: Method, path: &str) -> Result<Vec<u8>, Error> {
         self.send_bytes_query(method, path, &[]).await
