@@ -3,9 +3,6 @@
 #[rustfmt::skip]
 pub const PUBLIC_ROUTES: &[(&str, &str)] = &[
     ("GET", "/"),
-    ("POST", "/agent-integrations/apify/run"),
-    ("GET", "/agent-integrations/apify/runs/{runId}"),
-    ("GET", "/agent-integrations/apify/runs/{runId}/results"),
     ("POST", "/agent-integrations/composio/authorize"),
     ("GET", "/agent-integrations/composio/connections"),
     ("DELETE", "/agent-integrations/composio/connections/{connectionId}"),
@@ -199,6 +196,7 @@ pub const PUBLIC_ROUTES: &[(&str, &str)] = &[
     ("POST", "/teams/{teamId}/switch"),
     ("POST", "/teams/join"),
     ("GET", "/teams/me/usage"),
+    ("POST", "/telemetry/langfuse/otel/v1/traces"),
     ("GET", "/voice-agent/get-signed-url"),
     ("GET", "/waitlist/download/{token}"),
     ("POST", "/waitlist/join"),
