@@ -61,13 +61,10 @@ const RETAINED_UNEXPOSED_ROUTES = [
   ["DELETE", "/opencompany/instances/{slug}/inference-key"],
   ["PUT", "/opencompany/instances/{slug}/orchestrator"],
   ["POST", "/opencompany/instances/{slug}/usage"],
-  // Guild (teeny Discord service) callbacks, gated by GUILD_SERVICE_TOKEN.
-  ["POST", "/internal/discord/link"],
-  ["DELETE", "/internal/discord/link/{userId}"],
-  // Memory billing callbacks, gated by memory service.
-  ["GET", "/internal/memory/balance/{tenant}"],
-  ["POST", "/internal/memory/charge"],
-  ["POST", "/internal/memory/charge-storage"],
+  // No `/internal/*` routes here, deliberately. Service-to-service routes
+  // are undocumented in the backend so that this public repository never
+  // names them; the SDK blocks the whole `/internal/` prefix structurally
+  // instead (`is_structurally_unexposed` in src/lib.rs).
   // Telemetry ingestion endpoint for OTEL / Langfuse.
   ["POST", "/telemetry/langfuse/otel/v1/traces"],
   ["POST", "/admin/announcements"],

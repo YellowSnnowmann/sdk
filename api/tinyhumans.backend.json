@@ -12,7 +12,7 @@
     "totalOperationCount": 290,
     "operationCount": 234,
     "supplementalOperationCount": 13,
-    "excludedAdminOperationCount": 53,
+    "excludedAdminOperationCount": 48,
     "excludedWebhookOperationCount": 12,
     "servers": [
       "https://api.tinyhumans.ai/",

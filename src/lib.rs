@@ -520,6 +520,13 @@ fn is_structurally_unexposed(method: &Method, path: &str) -> bool {
         return true;
     }
 
+    // Service-to-service routes live under `/internal` and are deliberately
+    // absent from the published spec, so they cannot be listed by name here.
+    // No SDK user holds the credentials they take; block the whole prefix.
+    if segments.first() == Some(&"internal") {
+        return true;
+    }
+
     // The deployed Swagger document omits webhook receivers entirely. Treat an
     // undocumented webhook route as a receiver; generated bearer-authenticated
     // routes such as `/webhooks/core*` remain available.
