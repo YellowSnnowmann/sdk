@@ -194,6 +194,9 @@ impl TinyHumansClient {
     pub fn mascots(&self) -> api::mascots::MascotsApi<'_> {
         api::mascots::MascotsApi::new(&self.http)
     }
+    pub fn memory(&self) -> api::memory::MemoryApi<'_> {
+        api::memory::MemoryApi::new(&self.http)
+    }
     pub fn opencompany(&self) -> api::opencompany::OpenCompanyApi<'_> {
         api::opencompany::OpenCompanyApi::new(&self.http)
     }
