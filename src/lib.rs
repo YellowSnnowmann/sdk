@@ -593,12 +593,14 @@ mod exclusion_tests {
         // deployed OpenAPI spec. When the backend branch adds routes that
         // aren't yet deployed, the local count may differ; the RETAINED_UNEXPOSED_ROUTES
         // in sync-openapi.mjs preserves admin/webhook operations regardless.
-        // -> 60: the telemetry ingestion endpoint (OTEL / Langfuse) joins, and
-        // every `/internal/*` service callback leaves: they are no longer in
-        // the published spec, so this public list must not name them, and
-        // `is_structurally_unexposed` blocks the whole `/internal` prefix
-        // instead (see `internal_routes_are_blocked_without_being_named`).
-        assert_eq!(UNEXPOSED_ROUTES.len(), 60);
+        // -> 59: every `/internal/*` service callback leaves: they are no
+        // longer in the published spec, so this public list must not name
+        // them, and `is_structurally_unexposed` blocks the whole `/internal`
+        // prefix instead (see `internal_routes_are_blocked_without_being_named`).
+        // The telemetry ingestion endpoint (OTEL / Langfuse) does NOT belong
+        // here: it takes a normal user bearer token, not a service token, so
+        // it stays in PUBLIC_ROUTES.
+        assert_eq!(UNEXPOSED_ROUTES.len(), 59);
         for (method, template) in UNEXPOSED_ROUTES {
             let concrete_path = template
                 .split('/')
