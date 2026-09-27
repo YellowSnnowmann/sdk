@@ -171,9 +171,10 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 214 -> 229: the remaining priced Exa Contents, Answer, Find Similar,
     // Agent run, and Batch operations.
     // 229 -> 235: the six `/memory/*` routes (hosted agent memory).
-    // 235 -> 234: the Langfuse telemetry route removed from public surface
-    // (it is a service route intentionally unavailable through SDK).
-    assert_eq!(manifest["source"]["operationCount"], 234);
+    // The Langfuse telemetry route stays in the public surface: it takes a
+    // normal user bearer token (authenticateJWT), not a service token, so it
+    // is ordinary user-facing API rather than a service-to-service callback.
+    assert_eq!(manifest["source"]["operationCount"], 235);
     // 14 -> 13: `GET /orchestration/v1/steering` left with that family.
     assert_eq!(manifest["source"]["supplementalOperationCount"], 13);
     // 37 -> 39: the two service-token operations on
