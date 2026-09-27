@@ -16,6 +16,7 @@ pub struct MemoryApi<'a> {
 }
 
 impl<'a> MemoryApi<'a> {
+    /// Create a new memory API client.
     pub fn new(http: &'a HttpClient) -> Self {
         Self { http }
     }

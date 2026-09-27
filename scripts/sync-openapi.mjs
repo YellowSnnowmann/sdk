@@ -64,6 +64,12 @@ const RETAINED_UNEXPOSED_ROUTES = [
   // Guild (teeny Discord service) callbacks, gated by GUILD_SERVICE_TOKEN.
   ["POST", "/internal/discord/link"],
   ["DELETE", "/internal/discord/link/{userId}"],
+  // Memory billing callbacks, gated by memory service.
+  ["GET", "/internal/memory/balance/{tenant}"],
+  ["POST", "/internal/memory/charge"],
+  ["POST", "/internal/memory/charge-storage"],
+  // Telemetry ingestion endpoint for OTEL / Langfuse.
+  ["POST", "/telemetry/langfuse/otel/v1/traces"],
   ["POST", "/admin/announcements"],
   ["DELETE", "/admin/announcements/{announcementId}"],
   ["PATCH", "/admin/announcements/{announcementId}"],

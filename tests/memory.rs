@@ -106,3 +106,17 @@ async fn list_scopes_sends_prefix() {
     let result = client.memory().list_scopes(Some("proj")).await.unwrap();
     assert_eq!(*result, json!({"scopes": ["proj/a"]}));
 }
+
+#[tokio::test]
+async fn list_scopes_without_prefix() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/memory/scopes"))
+        .respond_with(ok(json!({"scopes": []})))
+        .mount(&server)
+        .await;
+
+    let client = TinyHumansClient::new(server.uri());
+    let result = client.memory().list_scopes(None).await.unwrap();
+    assert_eq!(*result, json!({"scopes": []}));
+}
