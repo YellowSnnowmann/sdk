@@ -597,9 +597,12 @@ mod exclusion_tests {
         // deployed OpenAPI spec. When the backend branch adds routes that
         // aren't yet deployed, the local count may differ; the RETAINED_UNEXPOSED_ROUTES
         // in sync-openapi.mjs preserves admin/webhook operations regardless.
-        // 61 -> 64: memory-api's three `/internal/memory/*` billing callbacks.
-        // 64 -> 65: telemetry ingestion endpoint for OTEL / Langfuse.
-        assert_eq!(UNEXPOSED_ROUTES.len(), 65);
+        // -> 60: the telemetry ingestion endpoint (OTEL / Langfuse) joins, and
+        // every `/internal/*` service callback leaves: they are no longer in
+        // the published spec, so this public list must not name them, and
+        // `is_structurally_unexposed` blocks the whole `/internal` prefix
+        // instead (see `internal_routes_are_blocked_without_being_named`).
+        assert_eq!(UNEXPOSED_ROUTES.len(), 60);
         for (method, template) in UNEXPOSED_ROUTES {
             let concrete_path = template
                 .split('/')
@@ -622,6 +625,29 @@ mod exclusion_tests {
                 method.as_str()
             );
         }
+    }
+
+    /// Service-to-service routes are undocumented, so they cannot appear in
+    /// the generated lists; the raw transport refuses the whole prefix.
+    #[test]
+    fn internal_routes_are_blocked_without_being_named() {
+        assert!(!UNEXPOSED_ROUTES.iter().any(|(_, p)| p.starts_with("/internal")));
+        assert!(!PUBLIC_ROUTES.iter().any(|(_, p)| p.starts_with("/internal")));
+        for (method, path) in [
+            (Method::GET, "/internal/anything"),
+            (Method::POST, "/internal/some/deeper/route"),
+            (Method::DELETE, "/internal"),
+        ] {
+            assert!(
+                matches!(
+                    reject_unexposed_route(&method, path),
+                    Err(Error::RouteNotExposed(_, _))
+                ),
+                "{method} {path} was not blocked"
+            );
+        }
+        // A segment merely named `internal` further down is not the prefix.
+        assert!(!is_structurally_unexposed(&Method::GET, "/teams/internal"));
     }
 
     /// Team-scoped operations gated by the team-admin *role* are not platform
