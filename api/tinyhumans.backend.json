@@ -8,11 +8,11 @@
     "url": "https://api.tinyhumans.ai/swagger.json",
     "title": "TinyHumans API",
     "version": "1.0.0",
-    "pathCount": 243,
-    "totalOperationCount": 269,
-    "operationCount": 212,
+    "pathCount": 253,
+    "totalOperationCount": 279,
+    "operationCount": 219,
     "supplementalOperationCount": 13,
-    "excludedAdminOperationCount": 49,
+    "excludedAdminOperationCount": 52,
     "excludedWebhookOperationCount": 12,
     "servers": [
       "https://api.tinyhumans.ai/",
@@ -312,6 +312,23 @@
       ]
     },
     {
+      "name": "memory",
+      "basePath": "/memory",
+      "auth": "bearer",
+      "operationCount": 6,
+      "tags": [
+        "Memory"
+      ],
+      "routes": [
+        "GET /memory/events",
+        "GET /memory/events/{id}",
+        "GET /memory/scopes",
+        "POST /memory/experience",
+        "POST /memory/forget",
+        "POST /memory/recall"
+      ]
+    },
+    {
       "name": "openCompany",
       "basePath": "/opencompany",
       "auth": "bearer",
@@ -459,6 +476,18 @@
         "POST /teams/{teamId}/switch",
         "PUT /teams/{teamId}",
         "PUT /teams/{teamId}/members/{userId}/role"
+      ]
+    },
+    {
+      "name": "telemetry",
+      "basePath": "/telemetry",
+      "auth": "bearer",
+      "operationCount": 1,
+      "tags": [
+        "Telemetry"
+      ],
+      "routes": [
+        "POST /telemetry/langfuse/otel/v1/traces"
       ]
     },
     {
