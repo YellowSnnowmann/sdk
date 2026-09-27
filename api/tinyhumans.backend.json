@@ -495,18 +495,6 @@
       ]
     },
     {
-      "name": "telemetry",
-      "basePath": "/telemetry",
-      "auth": "bearer",
-      "operationCount": 1,
-      "tags": [
-        "Telemetry"
-      ],
-      "routes": [
-        "POST /telemetry/langfuse/otel/v1/traces"
-      ]
-    },
-    {
       "name": "voiceAgent",
       "basePath": "/voice-agent",
       "auth": "bearer",
