@@ -590,6 +590,7 @@ mod exclusion_tests {
         // deployed OpenAPI spec. When the backend branch adds routes that
         // aren't yet deployed, the local count may differ; the RETAINED_UNEXPOSED_ROUTES
         // in sync-openapi.mjs preserves admin/webhook operations regardless.
+        // 61 -> 64: memory-api's three `/internal/memory/*` billing callbacks.
         assert_eq!(UNEXPOSED_ROUTES.len(), 64);
         for (method, template) in UNEXPOSED_ROUTES {
             let concrete_path = template
