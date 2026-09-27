@@ -631,8 +631,12 @@ mod exclusion_tests {
     /// the generated lists; the raw transport refuses the whole prefix.
     #[test]
     fn internal_routes_are_blocked_without_being_named() {
-        assert!(!UNEXPOSED_ROUTES.iter().any(|(_, p)| p.starts_with("/internal")));
-        assert!(!PUBLIC_ROUTES.iter().any(|(_, p)| p.starts_with("/internal")));
+        assert!(!UNEXPOSED_ROUTES
+            .iter()
+            .any(|(_, p)| p.starts_with("/internal")));
+        assert!(!PUBLIC_ROUTES
+            .iter()
+            .any(|(_, p)| p.starts_with("/internal")));
         for (method, path) in [
             (Method::GET, "/internal/anything"),
             (Method::POST, "/internal/some/deeper/route"),

@@ -195,12 +195,6 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 43 -> 44: `POST /admin/blog-images`, the multipart upload behind a
     // post's cover and body figures. Same token as the other blog writes.
     //
-    // 44 -> 46: `POST /internal/discord/link` and
-    // `DELETE /internal/discord/link/{userId}`, the teeny Discord service's
-    // account-link callbacks, gated by GUILD_SERVICE_TOKEN. Service-token
-    // routes, so they land here and never in the public surface; the
-    // user-facing half of that flow is `POST /auth/guild/link-token`.
-    //
     // 46 -> 47: `PUT /opencompany/instances/{slug}/orchestrator`, the
     // orchestrator's own service-token callback (same shape as the two
     // `inference-key` operations and `.../usage` above).
@@ -209,11 +203,11 @@ fn generated_rust_routes_match_the_public_manifest() {
     // fleet's service-token orchestrator token registration, already on
     // backend `main` and first synced with the Gemini routes.
     //
-    // 49 -> 52: memory-api's billing callbacks —
-    // `GET /internal/memory/balance/{tenant}`, `POST /internal/memory/charge`
-    // and `POST /internal/memory/charge-storage` — gated by
-    // MEMORY_BILLING_SERVICE_TOKEN, so excluded by their security requirement.
-    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 52);
+    // -> 48: service-to-service (`/internal/*`) routes are no longer in the
+    // backend's published spec at all — this repository is public, so it must
+    // not name them — and the SDK refuses that whole prefix structurally. The
+    // Langfuse telemetry receiver counts here instead of in the public surface.
+    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 48);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
     // 206 -> 208: the two new public opencompany routes above
     // (`GET /opencompany/companies` and `POST /opencompany/instances/{slug}/update`).
