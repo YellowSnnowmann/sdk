@@ -10,9 +10,9 @@
     "version": "1.0.0",
     "pathCount": 260,
     "totalOperationCount": 290,
-    "operationCount": 234,
+    "operationCount": 235,
     "supplementalOperationCount": 13,
-    "excludedAdminOperationCount": 48,
+    "excludedAdminOperationCount": 47,
     "excludedWebhookOperationCount": 12,
     "servers": [
       "https://api.tinyhumans.ai/",
@@ -492,6 +492,18 @@
         "POST /teams/{teamId}/switch",
         "PUT /teams/{teamId}",
         "PUT /teams/{teamId}/members/{userId}/role"
+      ]
+    },
+    {
+      "name": "telemetry",
+      "basePath": "/telemetry",
+      "auth": "bearer",
+      "operationCount": 1,
+      "tags": [
+        "Telemetry"
+      ],
+      "routes": [
+        "POST /telemetry/langfuse/otel/v1/traces"
       ]
     },
     {
