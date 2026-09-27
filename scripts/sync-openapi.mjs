@@ -281,8 +281,16 @@ function buildManifest(spec) {
         excludedOperations.push({ method: method.toUpperCase(), path });
         continue;
       }
+      // Exclude routes that are retained unexposed (e.g., telemetry ingestion),
+      // even if they appear in a local spec, to keep them out of publicOperations
+      // and ensure consistent generation across local and deployed specs.
+      const methodUpper = method.toUpperCase();
+      if (RETAINED_UNEXPOSED_ROUTES.some(([m, p]) => m === methodUpper && p === path)) {
+        excludedOperations.push({ method: methodUpper, path });
+        continue;
+      }
       publicOperations.push({
-        method: method.toUpperCase(),
+        method: methodUpper,
         namespace: namespaceFor(path),
         operation,
         path,
