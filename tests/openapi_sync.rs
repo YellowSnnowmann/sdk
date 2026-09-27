@@ -167,7 +167,9 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 208 -> 211: the Gemini integration — `POST .../gemini/models/{model}/generate-content`,
     // `POST .../gemini/live/sessions` and `GET .../gemini/live/sessions/{sessionId}`.
     // 211 -> 212: the retired orchestration session-list compatibility route.
-    assert_eq!(manifest["source"]["operationCount"], 212);
+    // 212 -> 210: the three Apify routes are gone with that integration, and
+    // `POST /telemetry/langfuse/otel/v1/traces` (the Langfuse OTLP relay) lands.
+    assert_eq!(manifest["source"]["operationCount"], 210);
     // 14 -> 13: `GET /orchestration/v1/steering` left with that family.
     assert_eq!(manifest["source"]["supplementalOperationCount"], 13);
     // 37 -> 39: the two service-token operations on
