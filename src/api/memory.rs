@@ -92,10 +92,7 @@ impl<'a> MemoryApi<'a> {
     }
 
     /// List the understanding derived from a scope; `scope` is required.
-    pub async fn list_understanding(
-        &self,
-        query: &[QueryParam],
-    ) -> Result<DynamicResponse, Error> {
+    pub async fn list_understanding(&self, query: &[QueryParam]) -> Result<DynamicResponse, Error> {
         self.http
             .send_typed(Method::GET, "/memory/understanding", query, None, true)
             .await
@@ -117,11 +114,10 @@ impl<'a> MemoryApi<'a> {
         bytes: Vec<u8>,
         content_type: &str,
     ) -> Result<DynamicResponse, Error> {
-        let value = self
-            .http
+        self.http
             .send_raw_body(Method::POST, "/memory/blobs", bytes, content_type)
-            .await?;
-        Ok(serde_json::from_value(value)?)
+            .await
+            .map(DynamicResponse::from)
     }
 
     /// Download an uploaded file: its bytes and the Content-Type it was stored under.
