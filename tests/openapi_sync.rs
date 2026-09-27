@@ -210,7 +210,8 @@ fn generated_rust_routes_match_the_public_manifest() {
     // (`GET /opencompany/companies` and `POST /opencompany/instances/{slug}/update`).
     // 208 -> 211: the three Gemini routes.
     // 211 -> 212: the retired orchestration session-list compatibility route.
-    assert_eq!(rust_routes.len(), 212);
+    // 212 -> 210: Apify's three routes out, the Langfuse OTLP relay in.
+    assert_eq!(rust_routes.len(), 210);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
