@@ -8,11 +8,11 @@
     "url": "https://api.tinyhumans.ai/swagger.json",
     "title": "TinyHumans API",
     "version": "1.0.0",
-    "pathCount": 253,
-    "totalOperationCount": 283,
-    "operationCount": 226,
+    "pathCount": 257,
+    "totalOperationCount": 287,
+    "operationCount": 232,
     "supplementalOperationCount": 13,
-    "excludedAdminOperationCount": 49,
+    "excludedAdminOperationCount": 47,
     "excludedWebhookOperationCount": 12,
     "servers": [
       "https://api.tinyhumans.ai/",
@@ -322,6 +322,23 @@
         "GET /mascots/{id}",
         "GET /mascots/{id}/riv",
         "POST /mascots/join-meeting"
+      ]
+    },
+    {
+      "name": "memory",
+      "basePath": "/memory",
+      "auth": "bearer",
+      "operationCount": 6,
+      "tags": [
+        "Memory"
+      ],
+      "routes": [
+        "GET /memory/events",
+        "GET /memory/events/{id}",
+        "GET /memory/scopes",
+        "POST /memory/experience",
+        "POST /memory/forget",
+        "POST /memory/recall"
       ]
     },
     {

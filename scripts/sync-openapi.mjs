@@ -61,9 +61,17 @@ const RETAINED_UNEXPOSED_ROUTES = [
   ["DELETE", "/opencompany/instances/{slug}/inference-key"],
   ["PUT", "/opencompany/instances/{slug}/orchestrator"],
   ["POST", "/opencompany/instances/{slug}/usage"],
-  // Guild (teeny Discord service) callbacks, gated by GUILD_SERVICE_TOKEN.
-  ["POST", "/internal/discord/link"],
-  ["DELETE", "/internal/discord/link/{userId}"],
+  // No `/internal/*` routes here, deliberately. Service-to-service routes
+  // are undocumented in the backend so that this public repository never
+  // names them; the SDK blocks the whole `/internal/` prefix structurally
+  // instead (`is_structurally_unexposed` in src/lib.rs).
+  //
+  // NOTE: `/telemetry/langfuse/otel/v1/traces` deliberately does NOT belong
+  // here. It takes a normal user bearer token (authenticateJWT) — see
+  // backend `src/routes/langfuseTelemetry.ts` — so it is ordinary
+  // user-facing API, not an admin operation or webhook receiver. A prior
+  // pass wrongly added it alongside the /internal/memory callbacks above;
+  // flagged by chatgpt-codex-connector on PR #39.
   ["POST", "/admin/announcements"],
   ["DELETE", "/admin/announcements/{announcementId}"],
   ["PATCH", "/admin/announcements/{announcementId}"],
@@ -275,8 +283,16 @@ function buildManifest(spec) {
         excludedOperations.push({ method: method.toUpperCase(), path });
         continue;
       }
+      // Exclude routes that are retained unexposed (e.g., telemetry ingestion),
+      // even if they appear in a local spec, to keep them out of publicOperations
+      // and ensure consistent generation across local and deployed specs.
+      const methodUpper = method.toUpperCase();
+      if (RETAINED_UNEXPOSED_ROUTES.some(([m, p]) => m === methodUpper && p === path)) {
+        excludedOperations.push({ method: methodUpper, path });
+        continue;
+      }
       publicOperations.push({
-        method: method.toUpperCase(),
+        method: methodUpper,
         namespace: namespaceFor(path),
         operation,
         path,

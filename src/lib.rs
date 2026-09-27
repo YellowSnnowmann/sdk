@@ -194,6 +194,9 @@ impl TinyHumansClient {
     pub fn mascots(&self) -> api::mascots::MascotsApi<'_> {
         api::mascots::MascotsApi::new(&self.http)
     }
+    pub fn memory(&self) -> api::memory::MemoryApi<'_> {
+        api::memory::MemoryApi::new(&self.http)
+    }
     pub fn opencompany(&self) -> api::opencompany::OpenCompanyApi<'_> {
         api::opencompany::OpenCompanyApi::new(&self.http)
     }
@@ -517,6 +520,13 @@ fn is_structurally_unexposed(method: &Method, path: &str) -> bool {
         return true;
     }
 
+    // Service-to-service routes live under `/internal` and are deliberately
+    // absent from the published spec, so they cannot be listed by name here.
+    // No SDK user holds the credentials they take; block the whole prefix.
+    if segments.first() == Some(&"internal") {
+        return true;
+    }
+
     // The deployed Swagger document omits webhook receivers entirely. Treat an
     // undocumented webhook route as a receiver; generated bearer-authenticated
     // routes such as `/webhooks/core*` remain available.
@@ -569,11 +579,7 @@ mod exclusion_tests {
         // dashboard uses for a post's cover and body figures. Same service
         // token as the other blog writes, so it is blocked alongside them.
         //
-        // 56 -> 58: the teeny Discord service (the guild) calls back into the
-        // backend on `POST /internal/discord/link` and
-        // `DELETE /internal/discord/link/{userId}`, both gated by a shared
-        // service token rather than a user bearer, so they are unexposed like
-        // the orchestrator's inference-key callbacks.
+        // 56 -> 58: two service-to-service callbacks (since removed; see -> 60).
         //
         // 58 -> 59: `PUT /opencompany/instances/{slug}/orchestrator`, the
         // orchestrator's own service-token-authenticated callback (same shape
@@ -587,7 +593,14 @@ mod exclusion_tests {
         // deployed OpenAPI spec. When the backend branch adds routes that
         // aren't yet deployed, the local count may differ; the RETAINED_UNEXPOSED_ROUTES
         // in sync-openapi.mjs preserves admin/webhook operations regardless.
-        assert_eq!(UNEXPOSED_ROUTES.len(), 61);
+        // -> 59: every `/internal/*` service callback leaves: they are no
+        // longer in the published spec, so this public list must not name
+        // them, and `is_structurally_unexposed` blocks the whole `/internal`
+        // prefix instead (see `internal_routes_are_blocked_without_being_named`).
+        // The telemetry ingestion endpoint (OTEL / Langfuse) does NOT belong
+        // here: it takes a normal user bearer token, not a service token, so
+        // it stays in PUBLIC_ROUTES.
+        assert_eq!(UNEXPOSED_ROUTES.len(), 59);
         for (method, template) in UNEXPOSED_ROUTES {
             let concrete_path = template
                 .split('/')
@@ -610,6 +623,33 @@ mod exclusion_tests {
                 method.as_str()
             );
         }
+    }
+
+    /// Service-to-service routes are undocumented, so they cannot appear in
+    /// the generated lists; the raw transport refuses the whole prefix.
+    #[test]
+    fn internal_routes_are_blocked_without_being_named() {
+        assert!(!UNEXPOSED_ROUTES
+            .iter()
+            .any(|(_, p)| p.starts_with("/internal")));
+        assert!(!PUBLIC_ROUTES
+            .iter()
+            .any(|(_, p)| p.starts_with("/internal")));
+        for (method, path) in [
+            (Method::GET, "/internal/anything"),
+            (Method::POST, "/internal/some/deeper/route"),
+            (Method::DELETE, "/internal"),
+        ] {
+            assert!(
+                matches!(
+                    reject_unexposed_route(&method, path),
+                    Err(Error::RouteNotExposed(_, _))
+                ),
+                "{method} {path} was not blocked"
+            );
+        }
+        // A segment merely named `internal` further down is not the prefix.
+        assert!(!is_structurally_unexposed(&Method::GET, "/teams/internal"));
     }
 
     /// Team-scoped operations gated by the team-admin *role* are not platform

@@ -13,6 +13,7 @@ pub mod health;
 pub mod inference;
 pub mod invite;
 pub mod mascots;
+pub mod memory;
 pub mod opencompany;
 pub mod payments;
 pub mod redirect;

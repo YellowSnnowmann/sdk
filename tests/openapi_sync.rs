@@ -171,7 +171,11 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 214 -> 229: the remaining priced Exa Contents, Answer, Find Similar,
     // Agent run, and Batch operations.
     // 229 -> 226: the three Apify routes are gone with that integration.
-    assert_eq!(manifest["source"]["operationCount"], 226);
+    // 226 -> 232: the six `/memory/*` routes (hosted agent memory).
+    // The Langfuse telemetry route stays in the public surface: it takes a
+    // normal user bearer token (authenticateJWT), not a service token, so it
+    // is ordinary user-facing API rather than a service-to-service callback.
+    assert_eq!(manifest["source"]["operationCount"], 232);
     // 14 -> 13: `GET /orchestration/v1/steering` left with that family.
     assert_eq!(manifest["source"]["supplementalOperationCount"], 13);
     // 37 -> 39: the two service-token operations on
@@ -193,12 +197,6 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 43 -> 44: `POST /admin/blog-images`, the multipart upload behind a
     // post's cover and body figures. Same token as the other blog writes.
     //
-    // 44 -> 46: `POST /internal/discord/link` and
-    // `DELETE /internal/discord/link/{userId}`, the teeny Discord service's
-    // account-link callbacks, gated by GUILD_SERVICE_TOKEN. Service-token
-    // routes, so they land here and never in the public surface; the
-    // user-facing half of that flow is `POST /auth/guild/link-token`.
-    //
     // 46 -> 47: `PUT /opencompany/instances/{slug}/orchestrator`, the
     // orchestrator's own service-token callback (same shape as the two
     // `inference-key` operations and `.../usage` above).
@@ -206,7 +204,13 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 47 -> 49: `PUT` and `DELETE /opencompany/orchestrators/{id}/token`, the
     // fleet's service-token orchestrator token registration, already on
     // backend `main` and first synced with the Gemini routes.
-    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 49);
+    //
+    // -> 47: service-to-service (`/internal/*`) routes are no longer in the
+    // backend's published spec at all — this repository is public, so it must
+    // not name them — and the SDK refuses that whole prefix structurally. The
+    // Langfuse telemetry receiver is not counted here: it is ordinary public
+    // API (user bearer token), so it stays in the public surface above.
+    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 47);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
     // 206 -> 208: the two new public opencompany routes above
     // (`GET /opencompany/companies` and `POST /opencompany/instances/{slug}/update`).
@@ -216,7 +220,8 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 214 -> 229: the remaining priced Exa Contents, Answer, Find Similar,
     // Agent run, and Batch operations.
     // 229 -> 226: the three Apify routes are gone with that integration.
-    assert_eq!(rust_routes.len(), 226);
+    // 226 -> 232: the six memory routes (the telemetry route stays public).
+    assert_eq!(rust_routes.len(), 232);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()

@@ -2,8 +2,8 @@
 
 The SDK surface is grounded in the deployed Swagger/OpenAPI contract at
 <https://api.tinyhumans.ai/swagger.json>. The spec reports TinyHumans API
-`1.0.0` with 182 paths and 196 operations. The Rust SDK exposes one typed
-method per public operation — **197 operations across the 21 namespaces
+`1.0.0` with 253 paths and 279 operations. The Rust SDK exposes one typed
+method per public operation — **205 public async methods across the 22 namespaces
 below**.
 The remaining 32 administrative and 12 webhook-receiver operations are
 intentionally excluded, including legacy routes whose summaries explicitly say
@@ -40,6 +40,7 @@ namespace.
 | `teams` | `/teams` | bearer | personal-team detail, usage, and billing; membership/invite routes are retired (`410`) |
 | `channels` | `/channels` | bearer | messages, reactions, typing, threads |
 | `mascots` | `/mascots` | mixed | catalog, render streams, meetings, Rive assets |
+| `memory` | `/memory` | bearer | write experiences, recall, events, forget, scopes (billed per call) |
 | `announcements` | `/announcements` | bearer | latest active announcement |
 | `coupons` | `/coupons` | bearer | redemption and coupon history |
 | `invite` | `/invite` | mixed | invite status, redemption, and owned codes |
