@@ -12,7 +12,6 @@ use serde_json::Value;
 
 use crate::{Error, HttpClient, QueryParam};
 
-pub mod apify;
 pub mod composio;
 pub mod crypto;
 pub mod file_storage;
@@ -30,7 +29,6 @@ pub mod tenor;
 pub mod tinyfish;
 pub mod twilio;
 
-pub use apify::*;
 pub use composio::*;
 pub use crypto::*;
 pub use file_storage::*;

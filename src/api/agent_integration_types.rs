@@ -4,7 +4,6 @@
 //! [`super::agent_integrations`]; this module re-exports them so the
 //! historical `api::agent_integration_types::*` path keeps working.
 
-pub use super::agent_integrations::apify::*;
 pub use super::agent_integrations::composio::*;
 pub use super::agent_integrations::crypto::*;
 pub use super::agent_integrations::file_storage::*;
