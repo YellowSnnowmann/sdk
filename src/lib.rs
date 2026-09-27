@@ -579,11 +579,7 @@ mod exclusion_tests {
         // dashboard uses for a post's cover and body figures. Same service
         // token as the other blog writes, so it is blocked alongside them.
         //
-        // 56 -> 58: the teeny Discord service (the guild) calls back into the
-        // backend on `POST /internal/discord/link` and
-        // `DELETE /internal/discord/link/{userId}`, both gated by a shared
-        // service token rather than a user bearer, so they are unexposed like
-        // the orchestrator's inference-key callbacks.
+        // 56 -> 58: two service-to-service callbacks (since removed; see -> 60).
         //
         // 58 -> 59: `PUT /opencompany/instances/{slug}/orchestrator`, the
         // orchestrator's own service-token-authenticated callback (same shape
