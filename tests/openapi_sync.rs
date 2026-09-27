@@ -204,11 +204,12 @@ fn generated_rust_routes_match_the_public_manifest() {
     // fleet's service-token orchestrator token registration, already on
     // backend `main` and first synced with the Gemini routes.
     //
-    // -> 48: service-to-service (`/internal/*`) routes are no longer in the
+    // -> 47: service-to-service (`/internal/*`) routes are no longer in the
     // backend's published spec at all — this repository is public, so it must
     // not name them — and the SDK refuses that whole prefix structurally. The
-    // Langfuse telemetry receiver counts here instead of in the public surface.
-    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 48);
+    // Langfuse telemetry receiver is not counted here: it is ordinary public
+    // API (user bearer token), so it stays in the public surface above.
+    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 47);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
     // 206 -> 208: the two new public opencompany routes above
     // (`GET /opencompany/companies` and `POST /opencompany/instances/{slug}/update`).
