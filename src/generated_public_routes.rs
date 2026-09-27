@@ -294,6 +294,7 @@ pub(crate) const UNEXPOSED_ROUTES: &[(&str, &str)] = &[
     ("POST", "/opencompany/instances/{slug}/usage"),
     ("DELETE", "/opencompany/orchestrators/{id}/token"),
     ("PUT", "/opencompany/orchestrators/{id}/token"),
+    ("POST", "/telemetry/langfuse/otel/v1/traces"),
     ("POST", "/voice-agent/chat/completions"),
     ("POST", "/webhooks/composio"),
     ("POST", "/webhooks/discord"),
