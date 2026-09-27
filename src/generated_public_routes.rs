@@ -221,7 +221,6 @@ pub const PUBLIC_ROUTES: &[(&str, &str)] = &[
     ("POST", "/teams/{teamId}/switch"),
     ("POST", "/teams/join"),
     ("GET", "/teams/me/usage"),
-    ("POST", "/telemetry/langfuse/otel/v1/traces"),
     ("GET", "/voice-agent/get-signed-url"),
     ("GET", "/waitlist/download/{token}"),
     ("POST", "/waitlist/join"),
