@@ -167,7 +167,10 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 208 -> 211: the Gemini integration — `POST .../gemini/models/{model}/generate-content`,
     // `POST .../gemini/live/sessions` and `GET .../gemini/live/sessions/{sessionId}`.
     // 211 -> 212: the retired orchestration session-list compatibility route.
-    assert_eq!(manifest["source"]["operationCount"], 212);
+    // 212 -> 219: the six `/memory/*` routes (hosted agent memory), plus
+    // `POST /telemetry/langfuse/otel/v1/traces`, already on backend `main`
+    // and first picked up by this sync.
+    assert_eq!(manifest["source"]["operationCount"], 219);
     // 14 -> 13: `GET /orchestration/v1/steering` left with that family.
     assert_eq!(manifest["source"]["supplementalOperationCount"], 13);
     // 37 -> 39: the two service-token operations on
@@ -202,13 +205,19 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 47 -> 49: `PUT` and `DELETE /opencompany/orchestrators/{id}/token`, the
     // fleet's service-token orchestrator token registration, already on
     // backend `main` and first synced with the Gemini routes.
-    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 49);
+    //
+    // 49 -> 52: memory-api's billing callbacks —
+    // `GET /internal/memory/balance/{tenant}`, `POST /internal/memory/charge`
+    // and `POST /internal/memory/charge-storage` — gated by
+    // MEMORY_BILLING_SERVICE_TOKEN, so excluded by their security requirement.
+    assert_eq!(manifest["source"]["excludedAdminOperationCount"], 52);
     assert_eq!(manifest["source"]["excludedWebhookOperationCount"], 12);
     // 206 -> 208: the two new public opencompany routes above
     // (`GET /opencompany/companies` and `POST /opencompany/instances/{slug}/update`).
     // 208 -> 211: the three Gemini routes.
     // 211 -> 212: the retired orchestration session-list compatibility route.
-    assert_eq!(rust_routes.len(), 212);
+    // 212 -> 219: the six memory routes and the Langfuse telemetry route.
+    assert_eq!(rust_routes.len(), 219);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
