@@ -12,6 +12,7 @@ use serde_json::Value;
 use url::Url;
 
 pub mod api;
+pub mod classify;
 pub mod generated_public_routes;
 pub mod jwt;
 #[cfg(feature = "socket")]
