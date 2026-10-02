@@ -177,7 +177,9 @@ fn generated_rust_routes_match_the_public_manifest() {
     // The Langfuse telemetry route stays in the public surface: it takes a
     // normal user bearer token (authenticateJWT), not a service token, so it
     // is ordinary user-facing API rather than a service-to-service callback.
-    assert_eq!(manifest["source"]["operationCount"], 240);
+    // 240 -> 243: the Apify run, run-status and run-results routes returned
+    // to the deployed public spec.
+    assert_eq!(manifest["source"]["operationCount"], 243);
     // 14 -> 13: `GET /orchestration/v1/steering` left with that family.
     assert_eq!(manifest["source"]["supplementalOperationCount"], 13);
     // 37 -> 39: the two service-token operations on
