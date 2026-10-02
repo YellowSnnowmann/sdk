@@ -8,9 +8,9 @@
     "url": "https://api.tinyhumans.ai/swagger.json",
     "title": "TinyHumans API",
     "version": "1.0.0",
-    "pathCount": 264,
-    "totalOperationCount": 295,
-    "operationCount": 240,
+    "pathCount": 212,
+    "totalOperationCount": 231,
+    "operationCount": 243,
     "supplementalOperationCount": 13,
     "excludedAdminOperationCount": 47,
     "excludedWebhookOperationCount": 12,
@@ -34,7 +34,7 @@
       "name": "agentIntegrations",
       "basePath": "/agent-integrations",
       "auth": "mixed",
-      "operationCount": 91,
+      "operationCount": 94,
       "tags": [
         "Agent Integrations",
         "OpenHuman parity"
@@ -45,6 +45,8 @@
         "DELETE /agent-integrations/exa/agent/runs/{runId}",
         "DELETE /agent-integrations/exa/batches/{batchId}",
         "DELETE /agent-integrations/file-storage/files/{fileId}",
+        "GET /agent-integrations/apify/runs/{runId}",
+        "GET /agent-integrations/apify/runs/{runId}/results",
         "GET /agent-integrations/composio/connections",
         "GET /agent-integrations/composio/github/repos",
         "GET /agent-integrations/composio/toolkits",
@@ -81,6 +83,7 @@
         "GET /agent-integrations/recall-calendar/oauth-complete",
         "GET /agent-integrations/recall-calendar/status",
         "PATCH /agent-integrations/file-storage/files/{fileId}",
+        "POST /agent-integrations/apify/run",
         "POST /agent-integrations/composio/authorize",
         "POST /agent-integrations/composio/execute",
         "POST /agent-integrations/composio/triggers",
@@ -477,6 +480,7 @@
       "auth": "bearer",
       "operationCount": 17,
       "tags": [
+        "OpenHuman parity",
         "Teams"
       ],
       "routes": [
@@ -548,7 +552,7 @@
       "auth": "bearer",
       "operationCount": 6,
       "tags": [
-        "Webhooks"
+        "OpenHuman parity"
       ],
       "routes": [
         "DELETE /webhooks/core/{id}",
