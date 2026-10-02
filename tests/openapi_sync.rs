@@ -226,7 +226,8 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 229 -> 226: the three Apify routes are gone with that integration.
     // 226 -> 232: the six memory routes (the telemetry route stays public).
     // 232 -> 240: the eight memory opt-in layer routes.
-    assert_eq!(rust_routes.len(), 240);
+    // 240 -> 243: the three Apify routes are back in the deployed spec.
+    assert_eq!(rust_routes.len(), 243);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
