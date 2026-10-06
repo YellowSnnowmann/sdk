@@ -1385,7 +1385,9 @@ async fn sarvam_chat_and_live_routes_are_typed() {
         .await;
     Mock::given(method("POST"))
         .and(path("/agent-integrations/sarvam/live/sessions"))
-        .and(body_json(json!({"mode": "speech", "language_code": "hi-IN"})))
+        .and(body_json(
+            json!({"mode": "speech", "language_code": "hi-IN"}),
+        ))
         .respond_with(ResponseTemplate::new(200).set_body_json(json!({
             "success": true,
             "data": {
@@ -1419,7 +1421,7 @@ async fn sarvam_chat_and_live_routes_are_typed() {
         }))
         .await
         .unwrap();
-    assert_eq!(chat.data()["choices"][0]["message"]["content"], "ok");
+    assert_eq!(chat["choices"][0]["message"]["content"], "ok");
 
     let ticket = api
         .sarvam_create_live_session(&SarvamLiveSessionRequest::Transcribe(
