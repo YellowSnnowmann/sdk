@@ -179,7 +179,31 @@ fn generated_rust_routes_match_the_public_manifest() {
     // is ordinary user-facing API rather than a service-to-service callback.
     // 240 -> 243: the Apify run, run-status and run-results routes returned
     // to the deployed public spec.
-    assert_eq!(manifest["source"]["operationCount"], 243);
+    // 243 -> 254: eleven routes, in two unrelated groups, both already on the
+    // backend `main` this syncs against.
+    //
+    // Seven are the `/memory/v1/*` family: the same hosted memory as
+    // `/memory/*`, answered in CortexDB's own dialect (its status, its body, no
+    // `{ success, data }` envelope) for a client written against the engine
+    // rather than against this API. The envelope collapses a `409` into a `400`
+    // and a `202` into a `200`, and the `cortex` memory driver's retry safety
+    // and read-after-write barrier are built on seeing both.
+    //
+    // Four are opencompany's `.../open`, `.../password`, `.../password/reset`
+    // and the `PUT` of the same password. Like the `GET /opencompany/companies`
+    // entry above, these were already public on backend `main` and absent here
+    // only because sdk main had been generated from a deployed spec that
+    // predated them; this sync is against a branch spec, so they come in with
+    // it. No exclusion counter moves: `excludedAdminOperationCount` and
+    // `excludedWebhookOperationCount` are unchanged below, and
+    // `UNEXPOSED_ROUTES` is untouched, so nothing was unblocked.
+    // 254 -> 257: the rest of CortexDB's Direct dialect — `experience/bulk`
+    // (one event per conversation turn), `beliefs/build` (on-demand
+    // consolidation) and the `beliefs` listing that reads it back. The wire's
+    // health probe, `v1/admin/health`, is deliberately not among them: no
+    // published path may carry an `admin` segment, which `rust_routes` asserts
+    // structurally below.
+    assert_eq!(manifest["source"]["operationCount"], 257);
     // 14 -> 13: `GET /orchestration/v1/steering` left with that family.
     assert_eq!(manifest["source"]["supplementalOperationCount"], 13);
     // 37 -> 39: the two service-token operations on
@@ -227,7 +251,10 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 226 -> 232: the six memory routes (the telemetry route stays public).
     // 232 -> 240: the eight memory opt-in layer routes.
     // 240 -> 243: the three Apify routes are back in the deployed spec.
-    assert_eq!(rust_routes.len(), 243);
+    // 243 -> 254: the seven `/memory/v1/*` dialect routes plus the four
+    // opencompany open/password routes — see `operationCount` above for both.
+    // 254 -> 257: `experience/bulk`, `beliefs/build` and the `beliefs` listing.
+    assert_eq!(rust_routes.len(), 257);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
