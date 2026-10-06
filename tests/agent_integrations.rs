@@ -1281,3 +1281,169 @@ async fn gemini_live_session_routes_are_typed() {
     assert_eq!(session.turn_count, 3);
     assert_eq!(session.usage_totals.search_queries, 1);
 }
+
+#[tokio::test]
+async fn sarvam_speech_routes_are_typed() {
+    use tinyhumans_sdk::api::agent_integration_types::{
+        SarvamSpeechToTextOptions, SarvamTextToSpeechRequest,
+    };
+    use wiremock::matchers::body_string_contains;
+
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/agent-integrations/sarvam/speech-to-text"))
+        .and(body_string_contains("name=\"language_code\"\r\n\r\nhi-IN"))
+        .and(body_string_contains("name=\"with_timestamps\"\r\n\r\ntrue"))
+        .and(body_string_contains("filename=\"clip.wav\""))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": true,
+            "data": {
+                "request_id": "r1", "transcript": "namaste", "language_code": "hi-IN",
+                "durationSeconds": 2.2, "costUsd": 0.0003
+            }
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path("/agent-integrations/sarvam/text-to-speech"))
+        .and(body_json(json!({
+            "text": "नमस्ते", "language_code": "hi-IN", "speaker": "shubh"
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": true,
+            "data": {"request_id": "r2", "audios": ["UklGRg=="], "characters": 6, "costUsd": 0.0003}
+        })))
+        .mount(&server)
+        .await;
+
+    let client = TinyHumansClient::new(server.uri());
+    let api = client.agent_integrations();
+    let stt = api
+        .sarvam_speech_to_text(
+            "clip.wav",
+            vec![0_u8; 8],
+            &SarvamSpeechToTextOptions {
+                language_code: Some("hi-IN".into()),
+                with_timestamps: Some(true),
+                ..Default::default()
+            },
+        )
+        .await
+        .unwrap();
+    assert_eq!(stt.transcript, "namaste");
+    assert_eq!(stt.duration_seconds, 2.2);
+    assert_eq!(stt.language_code.as_deref(), Some("hi-IN"));
+
+    let tts = api
+        .sarvam_text_to_speech(&SarvamTextToSpeechRequest {
+            text: "नमस्ते".into(),
+            language_code: "hi-IN".into(),
+            speaker: Some("shubh".into()),
+            ..Default::default()
+        })
+        .await
+        .unwrap();
+    assert_eq!(tts.audios, vec!["UklGRg==".to_string()]);
+    assert_eq!(tts.characters, 6);
+}
+
+#[tokio::test]
+async fn sarvam_chat_and_live_routes_are_typed() {
+    use tinyhumans_sdk::api::agent_integration_types::{
+        SarvamLiveSessionRequest, SarvamLiveSpeech, SarvamLiveTranscription,
+    };
+
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/agent-integrations/sarvam/chat/completions"))
+        .and(body_json(json!({
+            "model": "sarvam-105b",
+            "messages": [{"role": "user", "content": "hi"}]
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "id": "c1", "object": "chat.completion", "model": "sarvam-105b",
+            "choices": [{"index": 0, "message": {"role": "assistant", "content": "ok"}}],
+            "usage": {"prompt_tokens": 21, "completion_tokens": 2, "total_tokens": 23}
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path("/agent-integrations/sarvam/live/sessions"))
+        .and(body_json(json!({
+            "mode": "transcribe", "language_code": "ta-IN", "maxMinutes": 5
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": true,
+            "data": {
+                "sessionId": "s1", "ticket": "t1",
+                "wsUrl": "wss://api.example.com/agent-integrations/sarvam/live/ws?ticket=t1",
+                "ticketExpiresAt": "2026-10-06T00:01:00.000Z",
+                "model": "saaras:v4", "mode": "transcribe", "maxMinutes": 5, "reserveUsd": 0.5
+            }
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path("/agent-integrations/sarvam/live/sessions"))
+        .and(body_json(json!({"mode": "speech", "language_code": "hi-IN"})))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": true,
+            "data": {
+                "sessionId": "s2", "ticket": "t2", "wsUrl": "wss://x/ws?ticket=t2",
+                "ticketExpiresAt": "2026-10-06T00:01:00.000Z",
+                "model": "bulbul:v3", "mode": "speech", "maxMinutes": 60
+            }
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/agent-integrations/sarvam/live/sessions/s1"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": true,
+            "data": {
+                "sessionId": "s1", "mode": "transcribe", "model": "saaras:v4",
+                "status": "CLOSED", "maxMinutes": 5, "chargedUsd": 0.0004,
+                "closeReason": "session_end",
+                "usageTotals": {"audioSeconds": 2.79, "characters": 0}
+            }
+        })))
+        .mount(&server)
+        .await;
+
+    let client = TinyHumansClient::new(server.uri());
+    let api = client.agent_integrations();
+    let chat = api
+        .sarvam_chat_completion(&json!({
+            "model": "sarvam-105b",
+            "messages": [{"role": "user", "content": "hi"}]
+        }))
+        .await
+        .unwrap();
+    assert_eq!(chat.data()["choices"][0]["message"]["content"], "ok");
+
+    let ticket = api
+        .sarvam_create_live_session(&SarvamLiveSessionRequest::Transcribe(
+            SarvamLiveTranscription {
+                language_code: Some("ta-IN".into()),
+                max_minutes: Some(5),
+                ..Default::default()
+            },
+        ))
+        .await
+        .unwrap();
+    assert!(ticket.ws_url.ends_with("ticket=t1"));
+    assert_eq!(ticket.reserve_usd, 0.5);
+
+    let speech = api
+        .sarvam_create_live_session(&SarvamLiveSessionRequest::Speech(SarvamLiveSpeech {
+            language_code: "hi-IN".into(),
+            ..Default::default()
+        }))
+        .await
+        .unwrap();
+    assert_eq!(speech.model, "bulbul:v3");
+
+    let session = api.sarvam_live_session("s1").await.unwrap();
+    assert_eq!(session.status, "CLOSED");
+    assert_eq!(session.usage_totals.audio_seconds, 2.79);
+}
