@@ -146,7 +146,8 @@ integration margin, and chat is billed at cost.
 
 Streaming billing: transcription bills every second of audio sent once Sarvam
 accepts the session, so a session Sarvam rejects at connect costs nothing.
-Speech bills characters as Sarvam returns audio for them.
+Speech bills characters as Sarvam returns audio for them, and each `text`
+message may carry at most 2,500 characters (longer ones are dropped).
 
 ## OpenRouter media generation
 
