@@ -8,9 +8,9 @@
     "url": "https://api.tinyhumans.ai/swagger.json",
     "title": "TinyHumans API",
     "version": "1.0.0",
-    "pathCount": 212,
-    "totalOperationCount": 231,
-    "operationCount": 243,
+    "pathCount": 280,
+    "totalOperationCount": 312,
+    "operationCount": 257,
     "supplementalOperationCount": 13,
     "excludedAdminOperationCount": 47,
     "excludedWebhookOperationCount": 12,
@@ -331,7 +331,7 @@
       "name": "memory",
       "basePath": "/memory",
       "auth": "bearer",
-      "operationCount": 14,
+      "operationCount": 24,
       "tags": [
         "Memory"
       ],
@@ -345,18 +345,28 @@
         "GET /memory/facts",
         "GET /memory/scopes",
         "GET /memory/understanding",
+        "GET /memory/v1/beliefs",
+        "GET /memory/v1/events",
+        "GET /memory/v1/events/{id}",
+        "GET /memory/v1/scopes/list",
         "POST /memory/answer",
         "POST /memory/blobs",
         "POST /memory/experience",
         "POST /memory/forget",
-        "POST /memory/recall"
+        "POST /memory/recall",
+        "POST /memory/v1/answer",
+        "POST /memory/v1/beliefs/build",
+        "POST /memory/v1/experience",
+        "POST /memory/v1/experience/bulk",
+        "POST /memory/v1/forget",
+        "POST /memory/v1/recall"
       ]
     },
     {
       "name": "openCompany",
       "basePath": "/opencompany",
       "auth": "bearer",
-      "operationCount": 11,
+      "operationCount": 15,
       "tags": [
         "OpenCompany"
       ],
@@ -366,12 +376,16 @@
         "GET /opencompany/companies",
         "GET /opencompany/instances",
         "GET /opencompany/instances/usage",
+        "GET /opencompany/instances/{slug}/password",
         "POST /opencompany/instances",
         "POST /opencompany/instances/{slug}/custom-domain/verify",
+        "POST /opencompany/instances/{slug}/open",
+        "POST /opencompany/instances/{slug}/password/reset",
         "POST /opencompany/instances/{slug}/resume",
         "POST /opencompany/instances/{slug}/suspend",
         "POST /opencompany/instances/{slug}/update",
-        "PUT /opencompany/instances/{slug}/custom-domain"
+        "PUT /opencompany/instances/{slug}/custom-domain",
+        "PUT /opencompany/instances/{slug}/password"
       ]
     },
     {
@@ -480,7 +494,6 @@
       "auth": "bearer",
       "operationCount": 17,
       "tags": [
-        "OpenHuman parity",
         "Teams"
       ],
       "routes": [
@@ -552,7 +565,7 @@
       "auth": "bearer",
       "operationCount": 6,
       "tags": [
-        "OpenHuman parity"
+        "Webhooks"
       ],
       "routes": [
         "DELETE /webhooks/core/{id}",
