@@ -203,7 +203,9 @@ fn generated_rust_routes_match_the_public_manifest() {
     // health probe, `v1/admin/health`, is deliberately not among them: no
     // published path may carry an `admin` segment, which `rust_routes` asserts
     // structurally below.
-    assert_eq!(manifest["source"]["operationCount"], 257);
+    // 257 -> 262: the Sarvam integration — speech-to-text, text-to-speech,
+    // chat completions, and the streaming relay's ticket mint and status read.
+    assert_eq!(manifest["source"]["operationCount"], 262);
     // 14 -> 13: `GET /orchestration/v1/steering` left with that family.
     assert_eq!(manifest["source"]["supplementalOperationCount"], 13);
     // 37 -> 39: the two service-token operations on
@@ -254,7 +256,8 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 243 -> 254: the seven `/memory/v1/*` dialect routes plus the four
     // opencompany open/password routes — see `operationCount` above for both.
     // 254 -> 257: `experience/bulk`, `beliefs/build` and the `beliefs` listing.
-    assert_eq!(rust_routes.len(), 257);
+    // 257 -> 262: the five Sarvam routes — see `operationCount` above.
+    assert_eq!(rust_routes.len(), 262);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
