@@ -13,8 +13,9 @@
 //! and speak Sarvam's streaming protocol:
 //!
 //! - `transcribe`: send `{"event":"audio_input","audio":"<base64 PCM>"}` in the
-//!   ticket's encoding, plus `flush`, `speech_start`, `speech_end`, `ping` and
-//!   `end` events; receive `session.begin`, `vad.*`, `transcript.partial`,
+//!   `encoding` and `sample_rate` set in the [`SarvamLiveTranscription`]
+//!   request (default 16 kHz `linear16`), plus `flush`, `speech_start`,
+//!   `speech_end`, `ping` and `end` events; receive `session.begin`, `vad.*`, `transcript.partial`,
 //!   `transcript.final` and `session.end`.
 //! - `speech`: send `{"type":"text","data":{"text":"..."}}`, `{"type":"flush"}`
 //!   and `{"type":"ping"}`; receive `audio` chunks and a `final` event.

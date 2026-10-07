@@ -136,7 +136,8 @@ integration margin, and chat is billed at cost.
   streaming session: `Transcribe` (streaming speech-to-text) or `Speech`
   (streaming text-to-speech). Connect a plain WebSocket to `ws_url` within 60
   seconds and speak Sarvam's streaming protocol: `audio_input` events with
-  base64 PCM in the ticket's encoding for `Transcribe`, `text`/`flush` messages
+  base64 PCM in the `encoding` and `sample_rate` set on the `Transcribe` request
+  (default 16 kHz `linear16`), `text`/`flush` messages
   for `Speech`. The configuration is fixed at mint time and client `config`
   frames are dropped. Close codes are exported as `SARVAM_LIVE_CLOSE_*` and
   match Gemini Live's; the relay also closes with `1000` after Sarvam's
