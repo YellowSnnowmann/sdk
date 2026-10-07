@@ -1449,3 +1449,59 @@ async fn sarvam_chat_and_live_routes_are_typed() {
     assert_eq!(session.status, "CLOSED");
     assert_eq!(session.usage_totals.audio_seconds, 2.79);
 }
+
+#[tokio::test]
+async fn sarvam_voice_agent_session_is_typed() {
+    use tinyhumans_sdk::api::agent_integration_types::{SarvamLiveAgent, SarvamLiveSessionRequest};
+
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/agent-integrations/sarvam/live/sessions"))
+        .and(body_json(json!({
+            "mode": "agent",
+            "app_id": "support",
+            "output_sample_rate": 22050,
+            "agent_variables": {"plan": "pro"}
+        })))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": true,
+            "data": {
+                "sessionId": "s3", "ticket": "t3", "wsUrl": "wss://x/ws?ticket=t3",
+                "ticketExpiresAt": "2026-10-07T00:01:00.000Z",
+                "model": "support", "mode": "agent", "maxMinutes": 60, "reserveUsd": 0.5
+            }
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/agent-integrations/sarvam/live/sessions/s3"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "success": true,
+            "data": {
+                "sessionId": "s3", "mode": "agent", "model": "support",
+                "status": "CLOSED", "maxMinutes": 60, "chargedUsd": 0.01,
+                "closeReason": "interaction_end",
+                "usageTotals": {"audioSeconds": 0, "characters": 0, "agentSeconds": 42.5}
+            }
+        })))
+        .mount(&server)
+        .await;
+
+    let client = TinyHumansClient::new(server.uri());
+    let api = client.agent_integrations();
+    let mut variables = serde_json::Map::new();
+    variables.insert("plan".into(), json!("pro"));
+    let ticket = api
+        .sarvam_create_live_session(&SarvamLiveSessionRequest::Agent(SarvamLiveAgent {
+            app_id: "support".into(),
+            output_sample_rate: Some(22050),
+            agent_variables: Some(variables),
+            ..Default::default()
+        }))
+        .await
+        .unwrap();
+    assert_eq!(ticket.mode, "agent");
+
+    let session = api.sarvam_live_session("s3").await.unwrap();
+    assert_eq!(session.usage_totals.agent_seconds, 42.5);
+}
