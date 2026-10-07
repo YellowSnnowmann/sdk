@@ -106,6 +106,14 @@ impl<'a> MemoryApi<'a> {
             .await
     }
 
+    /// Whether hosted memory is free right now (`{active, until}`), so a
+    /// client can run background memory work without charging the caller.
+    pub async fn free_period(&self) -> Result<DynamicResponse, Error> {
+        self.http
+            .send_typed(Method::GET, "/memory/free-period", &[], None, true)
+            .await
+    }
+
     /// Upload a file (up to 20 MiB) as the raw body under its own MIME type.
     /// Reference the returned `blob_id` from an experience whose `content` is
     /// `{"kind": "blob_ref", "blob_id": ...}` to have it extracted into memory.
