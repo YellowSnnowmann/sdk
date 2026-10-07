@@ -142,8 +142,15 @@ integration margin, and chat is billed at cost.
   frames are dropped. Close codes are exported as `SARVAM_LIVE_CLOSE_*` and
   match Gemini Live's; the relay also closes with `1000` after Sarvam's
   `session.end`.
+- `SarvamLiveSessionRequest::Agent(SarvamLiveAgent { app_id, .. })` opens a
+  Sarvam Voice Agents conversation with an agent authored in Sarvam's dashboard
+  and allow-listed by the backend. Send `client.media.audio_chunk` frames
+  (`audio_base64`: 16-bit mono PCM at `input_sample_rate`) and answer every
+  `server.system.ping` with a `client.system.pong` carrying its `event_id`. It is
+  billed per second from `server.action.interaction_connected` to close, and the
+  backend refuses it (503) until an operator configures the per-minute price.
 - `sarvam_live_session(id)` returns a session's status, charged amount and
-  usage totals (`audio_seconds`, `characters`).
+  usage totals (`audio_seconds`, `characters`, `agent_seconds`).
 
 Streaming billing: transcription bills every second of audio sent once Sarvam
 accepts the session, so a session Sarvam rejects at connect costs nothing.
