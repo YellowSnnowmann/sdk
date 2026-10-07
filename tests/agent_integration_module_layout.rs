@@ -25,6 +25,7 @@ fn every_provider_has_its_own_module() {
     assert_named::<split::parallel::ParallelChatRequest>(std::marker::PhantomData);
     assert_named::<split::pricing::IntegrationPricingResponse>(std::marker::PhantomData);
     assert_named::<split::recall_calendar::RecallCalendarStatus>(std::marker::PhantomData);
+    assert_named::<split::sarvam::SarvamTextToSpeechRequest>(std::marker::PhantomData);
     assert_named::<split::tenor::TenorSearchRequest>(std::marker::PhantomData);
     assert_named::<split::tinyfish::TinyFishSearchRequest>(std::marker::PhantomData);
     assert_named::<split::twilio::TwilioCallRequest>(std::marker::PhantomData);
