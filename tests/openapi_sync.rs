@@ -205,7 +205,9 @@ fn generated_rust_routes_match_the_public_manifest() {
     // structurally below.
     // 257 -> 262: the Sarvam integration — speech-to-text, text-to-speech,
     // chat completions, and the streaming relay's ticket mint and status read.
-    assert_eq!(manifest["source"]["operationCount"], 262);
+    // 262 -> 263: `GET /memory/free-period`, whether hosted memory is free
+    // right now, so a client can run background memory work at no charge.
+    assert_eq!(manifest["source"]["operationCount"], 263);
     // 14 -> 13: `GET /orchestration/v1/steering` left with that family.
     assert_eq!(manifest["source"]["supplementalOperationCount"], 13);
     // 37 -> 39: the two service-token operations on
@@ -257,7 +259,8 @@ fn generated_rust_routes_match_the_public_manifest() {
     // opencompany open/password routes — see `operationCount` above for both.
     // 254 -> 257: `experience/bulk`, `beliefs/build` and the `beliefs` listing.
     // 257 -> 262: the five Sarvam routes — see `operationCount` above.
-    assert_eq!(rust_routes.len(), 262);
+    // 262 -> 263: `GET /memory/free-period` — see `operationCount` above.
+    assert_eq!(rust_routes.len(), 263);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()

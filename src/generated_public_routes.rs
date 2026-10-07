@@ -165,6 +165,7 @@ pub const PUBLIC_ROUTES: &[(&str, &str)] = &[
     ("POST", "/memory/experience"),
     ("GET", "/memory/facts"),
     ("POST", "/memory/forget"),
+    ("GET", "/memory/free-period"),
     ("POST", "/memory/recall"),
     ("GET", "/memory/scopes"),
     ("GET", "/memory/understanding"),

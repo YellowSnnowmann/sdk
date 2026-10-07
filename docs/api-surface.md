@@ -40,7 +40,7 @@ namespace.
 | `teams` | `/teams` | bearer | personal-team detail, usage, and billing; membership/invite routes are retired (`410`) |
 | `channels` | `/channels` | bearer | messages, reactions, typing, threads |
 | `mascots` | `/mascots` | mixed | catalog, render streams, meetings, Rive assets |
-| `memory` | `/memory` | bearer | write experiences, recall, answer, events, facts/beliefs/understanding, derivation status, blobs, forget, scopes (billed per call) |
+| `memory` | `/memory` | bearer | write experiences, recall, answer, events, facts/beliefs/understanding, derivation status, blobs, forget, scopes (billed per call), free period (whether memory is free right now) |
 | `announcements` | `/announcements` | bearer | latest active announcement |
 | `coupons` | `/coupons` | bearer | redemption and coupon history |
 | `invite` | `/invite` | mixed | invite status, redemption, and owned codes |

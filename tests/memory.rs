@@ -184,6 +184,25 @@ async fn derivation_status_sends_scope() {
 }
 
 #[tokio::test]
+async fn free_period_reads_the_period() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/memory/free-period"))
+        .respond_with(ok(
+            json!({"active": true, "until": "2026-11-06T00:00:00.000Z"}),
+        ))
+        .mount(&server)
+        .await;
+
+    let client = TinyHumansClient::new(server.uri());
+    let result = client.memory().free_period().await.unwrap();
+    assert_eq!(
+        *result,
+        json!({"active": true, "until": "2026-11-06T00:00:00.000Z"})
+    );
+}
+
+#[tokio::test]
 async fn upload_blob_sends_raw_bytes_with_their_type() {
     let server = MockServer::start().await;
     let bytes = vec![0x89, 0x50, 0x4e, 0x47, 0x00, 0xff];
