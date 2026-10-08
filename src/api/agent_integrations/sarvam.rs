@@ -20,6 +20,10 @@
 //! - `speech`: send `{"type":"text","data":{"text":"..."}}`, `{"type":"flush"}`
 //!   and `{"type":"ping"}`; receive `audio` chunks and a `final` event.
 //!
+//! - `agent`: a Sarvam Voice Agents conversation; send `client.media.*` frames
+//!   and answer `server.system.ping` with `client.system.pong`; receive
+//!   Sarvam's `server.*` messages.
+//!
 //! The session configuration is fixed when the ticket is minted, so `config`
 //! frames the client sends are dropped. The relay closes with one of the
 //! [`SARVAM_LIVE_CLOSE_UNAUTHORIZED`] family of codes, or `1000` after
@@ -186,12 +190,48 @@ pub struct SarvamLiveSpeech {
     pub max_chunk_length: Option<u32>,
 }
 
+/// A Sarvam Voice Agents (Samvaad) conversation with an agent authored in
+/// Sarvam's dashboard. Send `client.media.audio_chunk` frames
+/// (`audio_base64`: 16-bit mono PCM at `input_sample_rate`), optional
+/// `client.media.text`, and answer each `server.system.ping` with a
+/// `client.system.pong` carrying its `event_id`. Billed per second connected.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+pub struct SarvamLiveAgent {
+    /// One of the agents the backend allow-lists.
+    pub app_id: String,
+    #[serde(
+        default,
+        rename = "maxMinutes",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub max_minutes: Option<u32>,
+    /// Committed agent version; latest when omitted.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub version: Option<u32>,
+    /// `16000` (default) or `8000`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub input_sample_rate: Option<u32>,
+    /// `16000` (default) or `22050`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub output_sample_rate: Option<u32>,
+    /// At most 50 string, number or boolean values.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub agent_variables: Option<Map<String, Value>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub initial_language_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub initial_bot_message: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub initial_state_name: Option<String>,
+}
+
 /// Body of `POST /agent-integrations/sarvam/live/sessions`.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "mode", rename_all = "lowercase")]
 pub enum SarvamLiveSessionRequest {
     Transcribe(SarvamLiveTranscription),
     Speech(SarvamLiveSpeech),
+    Agent(SarvamLiveAgent),
 }
 
 /// A single-use relay ticket. Connect a WebSocket to `ws_url` before
@@ -218,6 +258,9 @@ pub struct SarvamLiveUsageTotals {
     pub audio_seconds: f64,
     #[serde(default)]
     pub characters: u64,
+    /// Connected Voice Agents time.
+    #[serde(default)]
+    pub agent_seconds: f64,
 }
 
 /// Status and metered usage of a streaming session.
