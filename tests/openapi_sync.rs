@@ -207,7 +207,9 @@ fn generated_rust_routes_match_the_public_manifest() {
     // chat completions, and the streaming relay's ticket mint and status read.
     // 262 -> 263: `GET /memory/free-period`, whether hosted memory is free
     // right now, so a client can run background memory work at no charge.
-    assert_eq!(manifest["source"]["operationCount"], 263);
+    // 263 -> 266: `POST /memory/v1/erasures`, `GET /memory/v1/erasures/{id}`
+    // and the hosted-memory wipe `DELETE /memory`.
+    assert_eq!(manifest["source"]["operationCount"], 266);
     // 14 -> 13: `GET /orchestration/v1/steering` left with that family.
     assert_eq!(manifest["source"]["supplementalOperationCount"], 13);
     // 37 -> 39: the two service-token operations on
@@ -260,7 +262,8 @@ fn generated_rust_routes_match_the_public_manifest() {
     // 254 -> 257: `experience/bulk`, `beliefs/build` and the `beliefs` listing.
     // 257 -> 262: the five Sarvam routes — see `operationCount` above.
     // 262 -> 263: `GET /memory/free-period` — see `operationCount` above.
-    assert_eq!(rust_routes.len(), 263);
+    // 263 -> 266: the erasure routes and `DELETE /memory` — see `operationCount` above.
+    assert_eq!(rust_routes.len(), 266);
     assert_eq!(rust_routes, manifest_routes);
     assert!(rust_routes
         .iter()
